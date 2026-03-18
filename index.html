@@ -2182,6 +2182,7 @@
     const historyTabByPlan = {};
     const historyCategoryByPlan = {};
     const historyFlightFilterByPlan = {};
+    const historyFlightTripByPlan = {};
     const priceShotByPlanPlatform = {};
     const PRICE_SHOT_STORAGE_KEY = "trip_price_shots_v1";
     const PRICE_HISTORY_STORAGE_KEY = "trip_price_history_cache_v2";
@@ -2229,6 +2230,7 @@
           recordsByPlan: historyRecordsByPlan,
           categoryByPlan: historyCategoryByPlan,
           flightFilterByPlan: historyFlightFilterByPlan,
+          flightTripByPlan: historyFlightTripByPlan,
           savedAt: Date.now()
         };
         localStorage.setItem(PRICE_HISTORY_STORAGE_KEY, JSON.stringify(payload));
@@ -2246,9 +2248,11 @@
           const recordsByPlan = parsed?.recordsByPlan && typeof parsed.recordsByPlan === "object" ? parsed.recordsByPlan : {};
           const categoryByPlan = parsed?.categoryByPlan && typeof parsed.categoryByPlan === "object" ? parsed.categoryByPlan : {};
           const flightFilterByPlan = parsed?.flightFilterByPlan && typeof parsed.flightFilterByPlan === "object" ? parsed.flightFilterByPlan : {};
+          const flightTripByPlan = parsed?.flightTripByPlan && typeof parsed.flightTripByPlan === "object" ? parsed.flightTripByPlan : {};
           Object.keys(historyPriceByPlan).forEach((k) => delete historyPriceByPlan[k]);
           Object.keys(historyRecordsByPlan).forEach((k) => delete historyRecordsByPlan[k]);
           Object.keys(historyFlightFilterByPlan).forEach((k) => delete historyFlightFilterByPlan[k]);
+          Object.keys(historyFlightTripByPlan).forEach((k) => delete historyFlightTripByPlan[k]);
           Object.entries(byPlan).forEach(([k, v]) => {
             if (!k || !v || typeof v !== "object") return;
             historyPriceByPlan[k] = v;
@@ -2265,6 +2269,10 @@
           Object.entries(flightFilterByPlan).forEach(([k, v]) => {
             if (!k || typeof v !== "string") return;
             historyFlightFilterByPlan[k] = v;
+          });
+          Object.entries(flightTripByPlan).forEach(([k, v]) => {
+            if (!k || typeof v !== "string") return;
+            historyFlightTripByPlan[k] = v;
           });
       } catch (_err) {
         // ignore
@@ -3452,6 +3460,26 @@
       return new Date(Number(ts || Date.now())).toLocaleString("zh-CN", { hour12: false });
     }
 
+    function formatPriceUpdatedTime(ts) {
+      const raw = Number(ts || 0);
+      if (!Number.isFinite(raw) || raw <= 0) return "--";
+      const now = Date.now();
+      const diffMs = Math.max(0, now - raw);
+      const minuteMs = 60 * 1000;
+      const hourMs = 60 * minuteMs;
+      if (diffMs < minuteMs) return "刚刚";
+      if (diffMs < 2 * minuteMs) return "1分钟前";
+      if (diffMs < hourMs) return `${Math.floor(diffMs / minuteMs)}分钟前`;
+      if (diffMs < 24 * hourMs) return `${Math.floor(diffMs / hourMs)}小时前`;
+      const d = new Date(raw);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      return `${y}-${m}-${day} ${hh}:${mm}`;
+    }
+
     function buildHistorySparklineSvg(values, width = 640, height = 78) {
       const arr = Array.isArray(values) ? values.filter((v) => Number.isFinite(Number(v))).map((v) => Number(v)) : [];
       if (!arr.length) return "";
@@ -3495,18 +3523,13 @@
     }
 
     function getFlightGroupKey(record) {
-      const flightNo = String(record?.flightNo || "").trim().toUpperCase();
       const depTime = String(record?.depTime || "").trim();
       const arrTime = String(record?.arrTime || "").trim();
-      if (flightNo) return `flight::${flightNo}`;
       if (depTime || arrTime) return `time::${depTime || "--:--"}→${arrTime || "--:--"}`;
       return "time::未配置时间";
     }
 
     function getFlightGroupLabel(groupKey) {
-      if (String(groupKey || "").startsWith("flight::")) {
-        return `航班 ${String(groupKey || "").slice("flight::".length)}`;
-      }
       if (String(groupKey || "").startsWith("time::")) {
         return `时刻 ${String(groupKey || "").slice("time::".length)}`;
       }
@@ -3576,24 +3599,41 @@
       }
       const category = historyCategoryByPlan[planId] || "flight";
       let scopedRecords = records;
+      let selectedFlightTrip = getHistoryFlightTripType(planId);
+      let flightPlan = null;
       if (category === "flight") {
-        const plan = plans.find((p) => p.id === planId) || plans.find((p) => p.id === currentId) || plans[0];
-        if (plan) {
-          const tripType = getFlightTripType(plan.id);
-          const routeCfg = getFlightRouteConfig(plan, tripType, tripType);
-          const compareTimeCfg = getFlightCompareTimeConfig(plan, tripType);
-          const targetDirection = tripType === "outbound" ? "outbound" : (tripType === "inbound" ? "inbound" : "round");
-          const targetDep = String(compareTimeCfg.depTime || "").trim();
-          const targetArr = String(compareTimeCfg.arrTime || "").trim();
+        flightPlan = plans.find((p) => p.id === planId) || plans.find((p) => p.id === currentId) || plans[0];
+        if (flightPlan) {
+          const filterByTrip = (tripType) => {
+            const routeCfg = getFlightRouteConfig(flightPlan, tripType, tripType);
+            const targetDirection = tripType === "outbound" ? "outbound" : (tripType === "inbound" ? "inbound" : "round");
+            return records.filter((r) => {
+              if (String(r?.category || "flight") !== "flight") return false;
+              const tripTypeMatch = String(r.tripType || "round");
+              if (tripTypeMatch !== (tripType === "round" ? "round" : "oneway")) return false;
+              if (tripType !== "round" && String(r.direction || "") !== targetDirection) return false;
+              if (!matchRecordRoute(r, routeCfg)) return false;
+              return true;
+            });
+          };
+          scopedRecords = filterByTrip(selectedFlightTrip);
+          if (!scopedRecords.length) {
+            const candidates = [selectedFlightTrip, "outbound", "inbound", "round"].filter((t, idx, arr) => arr.indexOf(t) === idx);
+            for (const t of candidates) {
+              const alt = filterByTrip(t);
+              if (alt.length) {
+                selectedFlightTrip = t;
+                historyFlightTripByPlan[planId] = t;
+                scopedRecords = alt;
+                break;
+              }
+            }
+          }
+          persistHistoryCache();
+        } else {
           scopedRecords = scopedRecords.filter((r) => {
             if (String(r?.category || "flight") !== "flight") return false;
-            const tripTypeMatch = String(r.tripType || "round");
-            if (tripTypeMatch !== (tripType === "round" ? "round" : "oneway")) return false;
-            if (tripType !== "round" && String(r.direction || "") !== targetDirection) return false;
-            if (!matchRecordRoute(r, routeCfg)) return false;
-            if (targetDep && String(r.depTime || "").trim() !== targetDep) return false;
-            if (targetArr && String(r.arrTime || "").trim() !== targetArr) return false;
-            return true;
+            return getFlightTripBucket(r) === selectedFlightTrip;
           });
         }
       }
@@ -3620,42 +3660,35 @@
       const max = values.length ? Math.max(...values) : null;
       const chart = buildHistorySparklineSvg(values);
       const headStats = category === "flight"
-        ? `共 ${values.length} 条（已按去程/返程/往返和航班/时刻分组）`
+        ? `共 ${values.length} 条（已按去程/返程/往返和时刻分组）`
         : (values.length ? `最低 ¥${min} · 最高 ¥${max} · 共 ${values.length} 条` : "暂无价格统计");
       const mainRowsHtml = renderHistoryRows(planId, [...asc].reverse(), category);
 
       let flightGroupHtml = "";
       let flightFilterHtml = "";
+      let flightTripTabsHtml = "";
       if (category === "flight") {
-        const tripGroups = new Map();
+        const timeGroups = new Map();
         asc.forEach((r) => {
-          const bucket = getFlightTripBucket(r);
-          if (!tripGroups.has(bucket)) tripGroups.set(bucket, new Map());
-          const byFlightOrTime = tripGroups.get(bucket);
           const key = getFlightGroupKey(r);
-          if (!byFlightOrTime.has(key)) byFlightOrTime.set(key, []);
-          byFlightOrTime.get(key).push(r);
+          if (!timeGroups.has(key)) timeGroups.set(key, []);
+          timeGroups.get(key).push(r);
         });
-        const bucketOrder = ["outbound", "inbound", "round", "oneway"];
-        const flightGroups = [];
-        bucketOrder.forEach((bucket) => {
-          if (!tripGroups.has(bucket)) return;
-          const byFlightOrTime = tripGroups.get(bucket);
-          [...byFlightOrTime.entries()].forEach(([gKey, gRows]) => {
-            const value = `${bucket}|||${gKey}`;
-            flightGroups.push({
-              value,
-              bucket,
-              gKey,
-              rows: [...gRows]
-            });
-          });
-        });
+        const flightGroups = [...timeGroups.entries()].map(([gKey, gRows]) => ({ value: gKey, gKey, rows: [...gRows] }));
         let selectedFlightGroup = historyFlightFilterByPlan[planId] || "";
         if (!flightGroups.some((x) => x.value === selectedFlightGroup)) {
           selectedFlightGroup = flightGroups[0]?.value || "";
         }
         historyFlightFilterByPlan[planId] = selectedFlightGroup;
+        flightTripTabsHtml = `
+          <div class="history-tabs" style="margin-top:8px;">
+            ${[
+              { id: "outbound", label: "去程" },
+              { id: "inbound", label: "返程" },
+              { id: "round", label: "往返" }
+            ].map((t) => `<button type="button" class="history-tab ${selectedFlightTrip === t.id ? "active" : ""}" data-action="switch-history-flight-trip" data-plan-id="${esc(planId)}" data-trip="${esc(t.id)}">${esc(t.label)}</button>`).join("")}
+          </div>
+        `;
         const selectedGroup = flightGroups.find((x) => x.value === selectedFlightGroup) || null;
         if (selectedGroup) {
           const gAsc = [...selectedGroup.rows].sort((a, b) => Number(a.createdAt || 0) - Number(b.createdAt || 0));
@@ -3667,14 +3700,14 @@
             <div class="history-tabs" style="margin-top:8px; align-items:center;">
               <span class="history-row-time">时刻筛选</span>
               <select data-action="switch-history-flight-group" data-plan-id="${esc(planId)}" style="border:1px solid #c7d9ec;border-radius:8px;padding:4px 8px;background:#fff;color:#2d4f71;">
-                ${flightGroups.map((g) => `<option value="${esc(g.value)}" ${g.value === selectedFlightGroup ? "selected" : ""}>${esc(`${getFlightTripBucketLabel(g.bucket)} · ${getFlightGroupLabel(g.gKey)}`)}</option>`).join("")}
+                ${flightGroups.map((g) => `<option value="${esc(g.value)}" ${g.value === selectedFlightGroup ? "selected" : ""}>${esc(getFlightGroupLabel(g.gKey))}</option>`).join("")}
               </select>
             </div>
           `;
           flightGroupHtml = `
             <div class="history-group" style="margin-top:10px;">
               <div class="history-head">
-                <b>${esc(getFlightTripBucketLabel(selectedGroup.bucket))} · ${esc(getFlightGroupLabel(selectedGroup.gKey))}</b>
+                <b>${esc(getFlightTripBucketLabel(selectedFlightTrip))} · ${esc(getFlightGroupLabel(selectedGroup.gKey))}</b>
                 <span class="history-stats">${gValues.length ? `最低 ¥${gMin} · 最高 ¥${gMax} · 共 ${gValues.length} 条` : "暂无价格统计"}</span>
               </div>
               ${buildHistorySparklineSvg(gValues, 640, 70) || ""}
@@ -3693,6 +3726,7 @@
         <div class="history-tabs">
           ${platforms.map((p) => `<button type="button" class="history-tab ${p === activePlatform ? "active" : ""}" data-action="switch-history-platform" data-plan-id="${esc(planId)}" data-platform="${esc(p)}">${esc(platformCodeToZhLabel(p))}</button>`).join("")}
         </div>
+        ${category === "flight" ? flightTripTabsHtml : ""}
         <div class="history-group">
           <div class="history-head">
             <b>${esc(platformCodeToZhLabel(activePlatform))}</b>
@@ -3889,6 +3923,7 @@
       delete historyPriceByPlan[planId];
       delete historyRecordsByPlan[planId];
       delete historyFlightFilterByPlan[planId];
+      delete historyFlightTripByPlan[planId];
       delete planFlightTimeState[planId];
       delete planFlightRouteState[planId];
       delete planFlightTripState[planId];
@@ -4063,7 +4098,7 @@
             <th>平台</th>
             <th>筛选时刻</th>
             <th>参考价格</th>
-            <th>预算参考</th>
+            <th>更新时间</th>
             <th>购买链接</th>
           </tr>
         </thead>
@@ -4071,13 +4106,16 @@
           ${displayPrices.map((row, idx) => {
             const record = findFlightRecord(row);
             const priceText = record ? `¥${Number(record.amount || 0).toLocaleString("zh-CN")}` : "待刷新";
+            const updatedAt = record ? Number(record.createdAt || record.updatedAt || 0) : 0;
+            const updatedText = formatPriceUpdatedTime(updatedAt);
+            const updatedTitle = updatedAt ? formatHistoryTime(updatedAt) : "";
             return `
               <tr data-price-idx="${idx}" data-flight="1">
                 <td>${row.label || (row.tripType === "oneway" ? "单程" : "往返")}</td>
                 <td>${row.platform}</td>
                 <td>${esc(compareTimeCfg.depTime || "--:--")} → ${esc(compareTimeCfg.arrTime || "--:--")}</td>
                 <td id="flight-price-value-${idx}">${renderValueCell(row, priceText)} <button type="button" class="mini-btn" data-action="refresh-flight" data-price-idx="${idx}" title="刷新${esc(row.platform)}价格">↻</button></td>
-                <td>${esc(row.total || row.detail || "")}</td>
+                <td title="${esc(updatedTitle)}">${esc(updatedText)}</td>
                 <td><a class="buy-link" target="_blank" rel="noreferrer" href="${resolveDeepLink(plan, row)}">查看/购买</a></td>
               </tr>
             `;
@@ -4874,16 +4912,31 @@
       } catch (_) {}
     }
 
-    function getFlightTripType(planId) {
-      const raw = String(planFlightTripState[planId] || "").trim();
-      if (raw === "oneway") return "outbound";
-      if (raw === "outbound" || raw === "inbound" || raw === "round") return raw;
+    function normalizeFlightTripType(raw) {
+      const v = String(raw || "").trim();
+      if (v === "oneway") return "outbound";
+      if (v === "outbound" || v === "inbound" || v === "round") return v;
       return "outbound";
     }
 
+    function getFlightTripType(planId) {
+      return normalizeFlightTripType(planFlightTripState[planId]);
+    }
+
+    function getHistoryFlightTripType(planId) {
+      const historyRaw = String(historyFlightTripByPlan[planId] || "").trim();
+      if (historyRaw) return normalizeFlightTripType(historyRaw);
+      return normalizeFlightTripType(planFlightTripState[planId]);
+    }
+
     function setFlightTripType(planId, tripType) {
-      planFlightTripState[planId] = tripType;
+      planFlightTripState[planId] = normalizeFlightTripType(tripType);
       saveFlightUiState();
+    }
+
+    function setHistoryFlightTripType(planId, tripType) {
+      historyFlightTripByPlan[planId] = normalizeFlightTripType(tripType);
+      persistHistoryCache();
     }
 
     function getFlightTimeConfig(planId, rowKey) {
@@ -5514,6 +5567,17 @@
         const platform = String(tabBtn.dataset.platform || "");
         if (!planId || !platform) return;
         historyTabByPlan[planId] = platform;
+        await loadPriceHistory(planId);
+        return;
+      }
+      const tripBtn = ev.target.closest('button[data-action="switch-history-flight-trip"]');
+      if (tripBtn) {
+        ev.preventDefault();
+        const planId = String(tripBtn.dataset.planId || "");
+        const tripRaw = String(tripBtn.dataset.trip || "outbound");
+        if (!planId) return;
+        setHistoryFlightTripType(planId, tripRaw);
+        delete historyFlightFilterByPlan[planId];
         await loadPriceHistory(planId);
         return;
       }
