@@ -1,0 +1,2610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>价阵 | 数字人无头终端大盘</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <style>
+        :root {
+            --primary: #8B5CF6;
+            /* 紫色主色调 */
+            --primary-hover: #7C3AED;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --bg-color: #0F172A;
+            /* 深灰蓝底色 */
+            --surface: #1E293B;
+            --surface-hover: #334155;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --border: #334155;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.2);
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: all 0.2s ease-out;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(at 0% 0%, hsla(253, 100%, 74%, 0.05) 0, transparent 50%),
+                radial-gradient(at 100% 100%, hsla(225, 100%, 50%, 0.05) 0, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 1.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Nav */
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        .header-actions a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: var(--surface);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        .header-actions a:hover {
+            color: var(--text-main);
+            border-color: var(--text-muted);
+        }
+
+        /* Main Grid */
+        .container {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: calc(100vh - 100px);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(12px);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Controls & Buttons */
+        .form-group label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="password"] {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.625rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+        }
+
+        button {
+            border: none;
+            padding: 0.625rem 1rem;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            font-size: 0.875rem;
+            background: var(--primary);
+            color: white;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            background: var(--surface-hover);
+            border-color: var(--text-muted);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-icon-only {
+            padding: 0.4rem;
+            background: transparent;
+            color: var(--text-muted);
+        }
+
+        .btn-icon-only:hover {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Auth Panel */
+        .auth-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 1.5rem 1rem;
+            gap: 0.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-md);
+        }
+
+        .auth-status i {
+            font-size: 2.5rem;
+        }
+
+        .auth-status.authorized i {
+            color: var(--success);
+        }
+
+        .auth-status.missing i {
+            color: var(--danger);
+        }
+
+        /* Terminal Window */
+        .terminal {
+            background: #000;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: #A3BE8C;
+            padding: 1rem;
+            height: 200px;
+            overflow-y: auto;
+            border-bottom-left-radius: var(--radius-lg);
+            border-bottom-right-radius: var(--radius-lg);
+            line-height: 1.5;
+        }
+
+        .term-line {
+            margin-bottom: 0.2rem;
+        }
+
+        .term-time {
+            color: var(--text-muted);
+            margin-right: 0.5rem;
+        }
+
+        .term-warn {
+            color: #EBCB8B;
+        }
+
+        .term-err {
+            color: #BF616A;
+        }
+
+        .term-info {
+            color: #88C0D0;
+        }
+
+        /* URL List */
+        .list-container {
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.5rem;
+        }
+
+        .list-item-text {
+            font-size: 0.8125rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+            /* 自动占据剩余空间 */
+            min-width: 0;
+            /* 配合 ellipsis */
+        }
+
+        /* Tabs & Data Table Zone */
+        .tab-bar {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            padding: 0 1.5rem;
+            background: rgba(30, 41, 59, 0.5);
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            border-radius: 0;
+            padding: 1rem 1.25rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            background: transparent;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: transparent;
+        }
+
+        .tab-content {
+            display: none;
+            flex: 1;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-chip {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.8125rem;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .stat-chip.highlight {
+            border-color: rgba(245, 158, 11, 0.3);
+            color: var(--warning);
+        }
+
+        .stat-val {
+            font-weight: 700;
+            font-family: var(--font-mono);
+        }
+
+        /* SKU Rows */
+        .sku-list-header {
+            display: grid;
+            grid-template-columns: 100px 2fr 1.5fr 1fr 80px 100px 40px;
+            gap: 1rem;
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .sku-list {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .sku-row {
+            display: grid;
+            grid-template-columns: 100px 2fr 1.5fr 1fr 80px 100px 40px;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            align-items: center;
+            font-size: 0.875rem;
+        }
+
+        .sku-row:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .sku-row.changed {
+            background: rgba(var(--danger-rgb), 0.05);
+        }
+
+        .shop-name {
+            font-size: 0.8125rem;
+            color: var(--primary);
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+
+        .sku-price {
+            font-weight: 700;
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            text-align: right;
+        }
+
+        .sku-diff {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .sku-diff.flat {
+            background: rgba(148, 163, 184, 0.1);
+            color: var(--text-muted);
+        }
+
+        .sku-diff.down {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .sku-diff.up {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .sku-chevron {
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .sku-row.expanded .sku-chevron {
+            transform: rotate(180deg);
+        }
+
+        .timeline-panel {
+            display: none;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .timeline-panel.open {
+            display: block;
+        }
+
+        .tl-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-size: 0.8125rem;
+            font-family: var(--font-mono);
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .tl-row:last-child {
+            border-bottom: none;
+        }
+
+        .tl-time {
+            color: var(--text-muted);
+        }
+
+        /* Table */
+        .table-wrapper {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-muted);
+            font-weight: 600;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--text-muted);
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            opacity: 0.5;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .status-dot.active {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        .status-dot.inactive {
+            background: var(--danger);
+        }
+
+        /* 进度条样式 */
+        .progress-wrapper {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            margin-bottom: 0.4rem;
+            color: var(--text-muted);
+        }
+
+        .progress-bar-bg {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .url-status-tag {
+            font-size: 0.65rem;
+            padding: 1px 6px;
+            border-radius: 10px;
+            margin-left: 8px;
+            font-weight: 700;
+        }
+
+        .url-status-tag.success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .url-status-tag.fail {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .url-index {
+            color: var(--primary);
+            font-weight: 700;
+            margin-right: 8px;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .url-index:hover {
+            color: var(--primary-hover);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header-area">
+        <div class="logo">
+            <i class="ri-robot-2-fill"></i> DataRadar | 数字人驱动引擎
+        </div>
+        <div class="header-actions">
+            <div style="display:flex; align-items:center; font-size:0.875rem; margin-right:1rem;">
+                <div class="status-dot inactive" id="engine-dot"></div>
+                <span id="engine-statusText" style="color:var(--text-muted); font-weight:600;">监控休眠中</span>
+            </div>
+            <a href="/legacy_api" target="_blank"><i class="ri-history-line"></i> 旧版 API 终端</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 左侧面板 -->
+        <div class="left-panel">
+
+            <!-- 身份核验卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <div><i class="ri-fingerprint-line"></i> Playwright 身份锚点</div>
+                </div>
+                <div class="card-body" style="padding: 1rem;">
+                    <div class="auth-status" id="auth-box">
+                        <i class="ri-shield-keyhole-line" id="auth-icon"></i>
+                        <div>
+                            <h3 id="auth-title" style="font-size:1rem;">状态检测中...</h3>
+                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">通过劫持 Chrome
+                                登录态，无感突破反爬体系</p>
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                        <button id="btn-auth" onclick="startAuth()"><i class="ri-qr-scan-2-line"></i>
+                            注入/更新真实身份凭证</button>
+                        <label
+                            style="font-size:0.75rem; color:var(--text-muted); display:flex; align-items:center; gap:0.3rem; margin:auto;">
+                            <input type="checkbox" id="keep-auth-open" style="flex:none;"> 弹窗登录后保留浏览器 (手工干预/看图)
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 目标队列与调度卡片 -->
+            <div class="card" style="flex:1;">
+                <div class="card-header">
+                    <div><i class="ri-list-check"></i> 嗅探目标池 & 调度</div>
+                    <span id="url-count"
+                        style="font-size:0.75rem; background:rgba(255,255,255,0.1); padding:0.1rem 0.5rem; border-radius:12px;">0
+                        URLs</span>
+                </div>
+                <div class="card-body" style="padding: 1rem; flex:none;">
+                    <div class="input-row" style="margin-bottom: 0.5rem;">
+                        <input type="text" id="new-url" placeholder="输入淘宝商品链接后回车追加...">
+                        <button class="btn-outline" onclick="addUrl()" title="单条添加"><i class="ri-add-line"></i></button>
+                        <button class="btn-outline" onclick="openBulkImport()" title="批量添加"><i
+                                class="ri-file-add-line"></i></button>
+                        <button class="btn-outline" style="color:var(--danger);" onclick="clearAllUrls()"
+                            title="清空全部"><i class="ri-delete-bin-7-line"></i></button>
+                    </div>
+                    <div class="list-container" id="url-list-container">
+                        <!-- URL items will be injected here -->
+                    </div>
+                </div>
+                <div
+                    style="padding: 1rem; border-top: 1px solid var(--border); background: rgba(0,0,0,0.1); display:flex; gap:0.5rem; flex-direction:column;">
+                    <!-- 调度设置 -->
+                    <div
+                        style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.8rem;">
+                            <span style="font-size: 0.8125rem; font-weight: 600; color: var(--text-muted);">采集引擎</span>
+                            <select id="api-mode-select"
+                                style="background:#000; color:#fff; border:1px solid var(--border); font-size:12px; padding:2px 5px;"
+                                onchange="saveApiMode()">
+                                <option value="onebound">Onebound (中频)</option>
+                                <option value="rapidapi">RapidAPI (高频)</option>
+                                <option value="vlm">VLM 视觉仿生 (scrcpy)</option>
+                                <option value="playwright">本地探针 (极速)</option>
+                            </select>
+                        </div>
+
+                        <div id="vlm-scan-row"
+                            style="display:none; justify-content:space-between; align-items:center; margin-bottom: 0.8rem; font-size:0.8125rem; color:var(--text-muted);">
+                            <span>VLM 扫描件数</span>
+                            <input type="number" id="vlm-scan-count" min="1" max="20" value="5"
+                                style="width:60px; padding:0.2rem; text-align:center;" onchange="saveApiMode()">
+                        </div>
+
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.8rem;">
+                            <span style="font-size: 0.8125rem; font-weight: 600; color: var(--text-muted);">调度频率</span>
+                            <select id="schedule-type-select"
+                                style="background:#000; color:#fff; border:1px solid var(--border); font-size:12px; padding:2px 5px;"
+                                onchange="switchScheduleMode()">
+                                <option value="interval">定时间隔</option>
+                                <option value="cron">定点轮询</option>
+                            </select>
+                        </div>
+
+                        <!-- 间隔模式 UI -->
+                        <div id="ui-interval-mode"
+                            style="display:flex; justify-content:space-between; align-items:center; font-size:0.8125rem; color:var(--text-muted);">
+                            <span>轮询间距 (小时)</span>
+                            <input type="number" id="interval-input" min="1" max="72" value="1"
+                                style="width:60px; padding:0.2rem; text-align:center;" onchange="saveInterval()">
+                        </div>
+
+                        <!-- 定点模式 UI -->
+                        <div id="ui-cron-mode" style="display:none; flex-direction:column; gap:0.5rem;">
+                            <div id="cron-time-list" style="display:flex; flex-wrap:wrap; gap:0.4rem;">
+                                <!-- 时间点标签将在此渲染 -->
+                            </div>
+                            <button class="btn-outline"
+                                style="padding: 2px 10px; font-size: 11px; align-self: flex-start; margin-top: 4px;"
+                                onclick="addTimePoint()">
+                                <i class="ri-add-line"></i> 增加时间点
+                            </button>
+                        </div>
+                    </div>
+
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; font-size:0.8125rem; color:var(--text-muted); margin-top:0.5rem; margin-bottom:0.2rem;">
+                        <label style="display:flex; align-items:center; gap:0.3rem;">
+                            <input type="checkbox" id="show-browser-chk" onchange="saveBrowserMode()"> <i
+                                class="ri-eye-line"></i> 破防排雷: 运行时不隐身
+                        </label>
+                        <div style="display:flex; align-items:center; gap:0.4rem;">
+                            <span>试跑:</span>
+                            <input type="number" id="test-limit" value="1" min="1" step="1" onchange="saveTestLimit()"
+                                style="width:50px; padding:2px 5px; font-size:12px; height:24px;">
+                        </div>
+                    </div>
+
+                    <!-- PushPlus Token 设置 (紧凑行) -->
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.2rem;">
+                        <input type="password" id="pushplus-token" placeholder="PushPlus Token"
+                            style="flex:1; background:rgba(0,0,0,0.2); border:1px solid var(--border); padding:3px 8px; font-size:11px; height:24px;">
+                        <button class="btn-outline" style="padding: 2px 8px; font-size: 11px; height:24px;"
+                            onclick="savePushToken()">保存 Token</button>
+                    </div>
+
+                    <!-- RapidAPI Key 设置 -->
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.3rem;">
+                        <input type="password" id="rapidapi-key" placeholder="RapidAPI Key"
+                            style="flex:1; background:rgba(0,0,0,0.2); border:1px solid var(--border); padding:3px 8px; font-size:11px; height:24px;">
+                        <button class="btn-outline"
+                            style="padding: 2px 8px; font-size: 11px; height:24px; border-color:var(--primary);"
+                            onclick="saveRapidKey()">保存 Key</button>
+                    </div>
+                    <div style="font-size:10px; color:var(--text-muted); margin-top:0.1rem; text-align:right;">
+                        <a href="https://rapidapi.com/gabrielius.u/api/taobao-advanced/" target="_blank"
+                            style="color:var(--primary);">获取 RapidAPI Key</a>
+                    </div>
+
+                    <!-- 推送格式选择 -->
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; margin-top:0.2rem; font-size:0.75rem; color:var(--text-muted);">
+                        <span>通知模式:</span>
+                        <div style="display:flex; gap:0.8rem;">
+                            <label style="display:flex; align-items:center; gap:0.2rem;">
+                                <input type="radio" name="push_format" value="html" checked
+                                    onchange="savePushFormat('html')"> 聚合表格
+                            </label>
+                            <label style="display:flex; align-items:center; gap:0.2rem;">
+                                <input type="radio" name="push_format" value="markdown"
+                                    onchange="savePushFormat('markdown')"> 普通消息
+                            </label>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:0.6rem;">
+                        <button class="btn-outline"
+                            style="width:100%; height:32px; font-size:12px; background:rgba(139, 92, 246, 0.1); border-color:rgba(139, 92, 246, 0.3);"
+                            onclick="openTemplateEditor()">
+                            <i class="ri-edit-box-line"></i> 设计富文本消息模板
+                        </button>
+                    </div>
+
+                    <div style="margin-top:0.5rem;">
+                        <button class="btn-outline"
+                            style="width:100%; height:32px; font-size:12px; background:rgba(16, 185, 129, 0.08); border-color:rgba(16, 185, 129, 0.28);"
+                            onclick="openWorkflowEditor()">
+                            <i class="ri-flow-chart"></i> 可视化编辑 VLM 流程
+                        </button>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-top: 0.8rem;">
+                        <button id="btn-start" onclick="handleGuardButton()"><i class="ri-play-fill"></i>
+                            启动VLM守护</button>
+                        <button id="btn-manual" class="btn-outline" onclick="triggerManual()"><i
+                                class="ri-rocket-2-line"></i> 测试VLM模式</button>
+                    </div>
+
+                    <!-- 进度展示区 -->
+                    <div id="batch-progress" class="progress-wrapper">
+                        <div class="progress-info">
+                            <span id="progress-text">准备执行中...</span>
+                            <span id="progress-percent">0/0</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="progress-fill" class="progress-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 控制台 -->
+            <div class="card" style="margin-bottom: 0;">
+                <div class="card-header" style="padding: 0.75rem 1rem;">
+                    <div style="font-size: 0.8125rem;"><i class="ri-terminal-window-line"></i> stdout 终端</div>
+                    <div style="display:flex;gap:0.5rem;">
+                        <input type="text" id="target-url" placeholder="输入单页面URL验证爬取..." value="640998957480"
+                            style="padding: 0.2rem 0.5rem; width:150px; font-size:0.75rem;">
+                        <button class="btn-outline" style="padding: 0.2rem 0.5rem;" onclick="runTestProbe()"
+                            id="btn-probe"><i class="ri-play-line"></i></button>
+                    </div>
+                </div>
+                <div class="terminal" id="term-out">
+                    <div class="term-line"><span class="term-time">[System]</span> 侦听器已就绪...</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 富文本模板编辑器模态框 -->
+        <div id="template-modal" class="modal-overlay"
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+            <div class="card"
+                style="width:700px; max-height:90vh; display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--primary); box-shadow:var(--shadow-glow);">
+                <div class="card-header">
+                    <div><i class="ri-edit-2-fill"></i> 自定义推送模板 (Rich Text)</div>
+                    <button class="btn-icon-only" onclick="closeTemplateEditor()"><i class="ri-close-line"></i></button>
+                </div>
+                <div class="card-body" style="padding:1.5rem; gap:1.5rem;">
+                    <div
+                        style="font-size:0.8rem; color:var(--text-muted); background:rgba(0,0,0,0.2); padding:0.8rem; border-radius:var(--radius-sm); border-left:4px solid var(--primary);">
+                        <i class="ri-information-line"></i> <b>使用说明：</b><br>
+                        1. 请在模板中包含 <code>{{item_loop_start}}</code> 和 <code>{{item_loop_end}}</code> 来定义多规格变动列表。 <br>
+                        2. 点击下方按钮可直接在光标处插入动态变量。
+                    </div>
+
+                    <div style="display:flex; flex-wrap:wrap; gap:0.5rem;" id="template-vars">
+                        {% raw %}
+                        <button class="btn-outline" style="font-size:11px; padding:3px 8px;"
+                            onmousedown="insertVar('{{item_loop_start}}', event)">列表开始</button>
+                        <button class="btn-outline" style="font-size:11px; padding:3px 8px;"
+                            onmousedown="insertVar('{{item_loop_end}}', event)">列表结束</button>
+                        <span style="border-right:1px solid var(--border); margin:0 5px;"></span>
+                        <button class="btn-outline" style="font-size:11px; padding:3px 8px;"
+                            onmousedown="insertVar('{{店铺名称}}', event)">店铺</button>
+                        <button class="btn-outline" style="font-size:11px; padding:3px 8px;"
+                            onmousedown="insertVar('{{商品名称}}', event)">商品</button>
+                        <button class="btn-outline" style="font-size:11px; padding:3px 8px;"
+                            onmousedown="insertVar('{{规格名称}}', event)">规格</button>
+                        <span style="border-right:1px solid var(--border); margin:0 2px;"></span>
+                        <button class="btn-outline" style="font-size:11px; padding:3px 8px;"
+                            onmousedown="insertVar('{{旧价格}}', event)">旧价</button>
+                        <button class="btn-outline" style="font-size:11px; padding:3px 8px;"
+                            onmousedown="insertVar('{{当前价格}}', event)">当前价</button>
+                        <button class="btn-outline" style="font-size:11px; padding:3px 8px;"
+                            onmousedown="insertVar('{{变动幅度}}', event)">变动幅度</button>
+                        <button class="btn-outline" style="font-size:11px; padding:3px 8px;"
+                            onmousedown="insertVar('{{趋势图标}}', event)">趋势图</button>
+                        <button class="btn-outline" style="font-size:11px; padding:3px 8px;"
+                            onmousedown="insertVar('{{检测时间}}', event)">时间</button>
+                        {% endraw %}
+                    </div>
+
+                    <div id="editor-container"
+                        style="height:350px; background:white; color:black; border-radius:var(--radius-sm);"></div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:1rem;">
+                        <button class="btn-outline" onclick="resetTemplateToDefault()">恢复默认表格模板</button>
+                        <button onclick="saveCustomTemplate()" id="btn-save-template"><i class="ri-save-line"></i>
+                            保存模板并应用</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="workflow-modal" class="modal-overlay"
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.82); z-index:1001; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+            <div class="card"
+                style="width:min(1180px, 96vw); max-height:92vh; display:flex; flex-direction:column; background:var(--surface); border:1px solid rgba(16, 185, 129, 0.35); box-shadow:0 0 30px rgba(16, 185, 129, 0.12);">
+                <div class="card-header">
+                    <div><i class="ri-flow-chart"></i> 可视化 VLM 流程编辑器</div>
+                    <div style="display:flex; gap:0.5rem;">
+                        <button class="btn-outline" style="font-size:12px; padding:4px 10px;" onclick="addWorkflowStep()"><i class="ri-add-line"></i> 添加步骤</button>
+                        <button class="btn-icon-only" onclick="closeWorkflowEditor()"><i class="ri-close-line"></i></button>
+                    </div>
+                </div>
+                <div class="card-body" style="gap:1rem;">
+                    <div style="font-size:12px; color:var(--text-muted); line-height:1.6;">
+                        每一行就是一个动作。坐标输入框右侧 `+` 可以弹出当前手机截图取点；范围选择会用拖拽框选自动回填左上角和右下角坐标。
+                    </div>
+                    <div id="workflow-step-body" style="display:flex; flex-direction:column; gap:10px; overflow:auto; border:1px solid var(--border); border-radius:10px; padding:12px;"></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+                        <div style="font-size:12px; color:var(--text-muted);">
+                            示例链路：启动淘宝 -> 点击我的 -> 点击收藏 -> 随机打开商品 -> 滑动 -> 点击共xx款 -> 循环识别 SKU -> 写入 Excel。
+                        </div>
+                        <button onclick="saveWorkflowSteps()" id="btn-save-workflow"><i class="ri-save-line"></i> 保存 VLM 流程</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="picker-modal" class="modal-overlay"
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1010; align-items:center; justify-content:center;">
+            <div class="card" style="width:min(1280px, 98vw); max-height:96vh;">
+                <div class="card-header">
+                    <div><i class="ri-crop-line"></i> 取点 / 框选手机屏幕坐标</div>
+                    <button class="btn-icon-only" onclick="closePickerModal()"><i class="ri-close-line"></i></button>
+                </div>
+                <div class="card-body" style="gap:0.75rem;">
+                    <div id="picker-hint" style="font-size:12px; color:var(--text-muted);">加载当前手机截图中...</div>
+                    <div style="position:relative; overflow:auto; max-height:82vh; min-height:60vh; border:1px solid var(--border); border-radius:10px; display:flex; justify-content:center; align-items:flex-start; background:rgba(0,0,0,0.18);">
+                        <img id="picker-image" alt="当前手机截图" style="display:block; max-width:100%; max-height:82vh; width:auto; height:auto; user-select:none;">
+                        <div id="picker-rect" style="display:none; position:absolute; border:2px solid #10B981; background:rgba(16,185,129,0.15); pointer-events:none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="step-preview-modal" class="modal-overlay"
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.82); z-index:1003; align-items:center; justify-content:center;">
+            <div class="card" style="width:min(860px, 94vw); max-height:88vh;">
+                <div class="card-header">
+                    <div><i class="ri-flask-line"></i> 单步试运行结果</div>
+                    <button class="btn-icon-only" onclick="closeStepPreview()"><i class="ri-close-line"></i></button>
+                </div>
+                <div class="card-body" id="step-preview-body" style="gap:0.75rem;"></div>
+            </div>
+        </div>
+
+        <div id="coord-group-modal" class="modal-overlay"
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.82); z-index:1004; align-items:center; justify-content:center;">
+            <div class="card" style="width:min(760px, 92vw); max-height:88vh;">
+                <div class="card-header">
+                    <div><i class="ri-grid-line"></i> 坐标组管理</div>
+                    <button class="btn-icon-only" onclick="closeCoordGroupModal()"><i class="ri-close-line"></i></button>
+                </div>
+                <div class="card-body" style="gap:0.75rem;">
+                    <div style="font-size:12px; color:var(--text-muted);">一组坐标用英文分号分隔，例如 `500,300;520,340;600,700`。</div>
+                    <div id="coord-group-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+                    <button class="btn-outline" style="align-self:flex-start;" onclick="addCoordGroup()"><i class="ri-add-line"></i> 新建坐标组</button>
+                    <div style="display:flex; justify-content:flex-end;">
+                        <button id="btn-save-coord-groups" onclick="saveWorkflowSteps()"><i class="ri-save-line"></i> 保存坐标组</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧数据面板 -->
+        <div class="right-panel card">
+            <div class="card-header" style="border-bottom:none;">
+                <div style="display:flex; align-items:center; gap:0.5rem;"><i class="ri-line-chart-fill"></i> 数据资产追踪阵列
+                </div>
+                <div style="display:flex; gap:0.5rem;">
+                    <button class="btn-outline" style="padding: 0.35rem 0.8rem; font-size: 0.75rem;"
+                        onclick="copyShareLink()" title="复制公开大盘链接给他人查看"><i class="ri-share-forward-line"></i>
+                        复制分享链接</button>
+                    <button class="btn-outline" style="padding: 0.35rem 0.8rem; font-size: 0.75rem;"
+                        onclick="testWechat()" id="btn-wechat"><i class="ri-wechat-line"></i> 测试微信</button>
+                    <button class="btn-outline" style="padding: 0.35rem 0.8rem; font-size: 0.75rem;"
+                        onclick="refreshCurrentTab()"><i class="ri-loop-right-line"></i> 同步大盘</button>
+                </div>
+            </div>
+
+            <div class="tab-bar">
+                <button class="tab-btn active" data-tab="price-changes"
+                    onclick="switchTab('price-changes')">价格动态侦测</button>
+                <button class="tab-btn" data-tab="full-history" onclick="switchTab('full-history')">原始封存归档</button>
+            </div>
+
+            <!-- Tab 1 -->
+            <div class="tab-content active" id="tab-price-changes">
+                <div class="stats-bar">
+                    <div class="stat-chip"><i class="ri-links-line" style="color:var(--primary);"></i> URL总数: <span
+                            class="stat-val" id="stat-url-total">0</span></div>
+                    <div class="stat-chip"><i class="ri-box-3-line" style="color:var(--primary);"></i> SKU总数: <span
+                            class="stat-val" id="stat-total">0</span></div>
+                    <div class="stat-chip highlight"><i class="ri-alarm-warning-line"></i> 最新变价: <span class="stat-val"
+                            id="stat-changed">0</span></div>
+                    <div class="stat-chip"><i class="ri-time-line"></i> 最后同步: <span class="stat-val"
+                            id="stat-time">-</span>
+                    </div>
+                </div>
+                <div class="sku-list-header">
+                    <span>店铺</span>
+                    <span>商品基体</span>
+                    <span>SKU 映射</span>
+                    <span style="text-align:right;">时效性</span>
+                    <span style="text-align:right;">检测标价(￥)</span>
+                    <span style="text-align:center;">实时库存</span>
+                    <span style="text-align:right;">波动幅度</span>
+                    <span></span>
+                </div>
+                <div class="sku-list" id="sku-list-container">
+                    <div class="empty-state"><i class="ri-loader-4-line" style="animation:spin 1s linear infinite;"></i>
+                        <p>拼命分析中...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2 -->
+            <div class="tab-content" id="tab-full-history">
+                <div class="table-wrapper">
+                    <table id="history-table">
+                        <thead id="history-thead">
+                            <tr>
+                                <th>入库时间戳</th>
+                                <th>店铺信标</th>
+                                <th>商品名</th>
+                                <th>SKU特征</th>
+                                <th style="text-align:right;">截获价格(￥)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody">
+                            <tr>
+                                <td colspan="5">
+                                    <div class="empty-state">
+                                        <p>数据管道尚未流出历史记录</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 脚本逻辑与旧版逻辑的高效融合 -->
+    <!-- 批量导入模态框 -->
+    <div id="bulk-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3><i class="ri-file-add-line"></i> 批量导入嗅探目标</h3>
+                <button class="close-btn" onclick="closeBulkImport()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">
+                    请输入商品 URL (每行一个)，系统会自动去重并过滤非淘宝/天猫链接。
+                </p>
+                <textarea id="bulk-urls-input"
+                    placeholder="https://item.taobao.com/item.htm?id=xxx&#10;https://detail.tmall.com/item.htm?id=yyy"
+                    style="width: 100%; height: 300px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid var(--border); padding: 10px; font-family: monospace; font-size: 12px; resize: none;"></textarea>
+            </div>
+            <div class="modal-footer" style="display:flex; justify-content: space-between; align-items: center;">
+                <div id="bulk-status" style="font-size: 12px;"></div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-outline" onclick="closeBulkImport()">取消</button>
+                    <button id="btn-do-bulk" class="btn-primary" onclick="doBulkImport()">确认导入</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // -- Terminal log
+        const termOut = document.getElementById('term-out');
+        function log(msg, type = 'info') {
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const div = document.createElement('div');
+            div.className = 'term-line term-' + type;
+            let iconText = '';
+            if (type === 'warn') iconText = '[WARN] ';
+            if (type === 'err') iconText = '[FAIL] ';
+            div.innerHTML = `<span class="term-time">[${time}]</span> ${iconText}${msg}`;
+            termOut.appendChild(div);
+            termOut.scrollTop = termOut.scrollHeight;
+        }
+
+        // -- Digital Human Auth Flow
+        function checkAuthStatus() {
+            fetch('/api/browser/auth_status')
+                .then(r => r.json())
+                .then(data => {
+                    const box = document.getElementById('auth-box');
+                    const icon = document.getElementById('auth-icon');
+                    const title = document.getElementById('auth-title');
+                    if (data.authorized) {
+                        box.className = 'auth-status authorized';
+                        icon.className = 'ri-shield-check-fill';
+                        title.innerText = '鉴权凭证已接管';
+                    } else {
+                        box.className = 'auth-status missing';
+                        icon.className = 'ri-shield-cross-fill';
+                        title.innerText = '凭证破损或未初始化';
+                    }
+                });
+        }
+
+        function startAuth() {
+            const btn = document.getElementById('btn-auth');
+            btn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i> 唤醒物理浏览器...';
+            btn.disabled = true;
+            log("正在请求桌面弹出交互式Chrome窗口，请准备扫码...");
+            const keepOpen = document.getElementById('keep-auth-open').checked;
+
+            fetch('/api/browser/init_auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ keep_open: keepOpen })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        log("✅ Auth.json 凭据吸取成功，数字人已具备穿透权限。");
+                        checkAuthStatus();
+                    } else {
+                        log("❌ 权限吸取失败: " + data.msg, "err");
+                    }
+                })
+                .finally(() => {
+                    btn.innerHTML = '<i class="ri-qr-scan-2-line"></i> 注入/更新真实身份凭证';
+                    btn.disabled = false;
+                });
+        }
+
+        function runTestProbe() {
+            const url = document.getElementById('target-url').value.trim();
+            if (!url) return;
+            log(`开始尝试穿透解析单页面: ${url}`);
+
+            fetch('/api/browser/test_probe', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: url })
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    log(`✅ 破防成功 (Fallback: ${data.fallback})`);
+                    if (data.fallback) {
+                        log(`>> 纯DOM抓取: 标题=${data.data.title}, 标价=${data.data.price_text}`);
+                    } else {
+                        log(`>> 截获底层mtop全量JSON树, 包含SKU数: ${data.data?.skuBase?.skus?.length || '未知'}`);
+                    }
+                } else {
+                    log(`❌ 穿透失败: ${data.msg}`, "err");
+                }
+            });
+        }
+
+        // -- Config & Engine Management
+        let GLOBAL_URLS = [];
+        let GLOBAL_VLM_STEPS = [];
+        let GLOBAL_VLM_COORD_GROUPS = {};
+
+        function defaultWorkflowStep() {
+            return {
+                id: 'step_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                enabled: true,
+                name: '新步骤',
+                action: 'click_vlm',
+                collapsed: false,
+                keyword: '',
+                coord: '',
+                tap_start: '',
+                tap_end: '',
+                from_coord: '',
+                to_coord: '',
+                region_start: '',
+                region_end: '',
+                condition_action: 'region_recognize',
+                compare_operator: '=',
+                compare_value: '',
+                compare_image: '',
+                match_threshold: 0.78,
+                delay_ms: 1000,
+                wait_after: 1,
+                duration_ms: 500,
+                retries: 3,
+                max_scrolls: 8,
+                children: []
+            };
+        }
+
+        function syncActionButtons(taskRunning, schedulerEnabled = false) {
+            const btnStart = document.getElementById('btn-start');
+            const btnManual = document.getElementById('btn-manual');
+
+            if (taskRunning || schedulerEnabled) {
+                btnStart.dataset.mode = 'stop';
+                btnStart.innerHTML = '<i class="ri-stop-fill"></i> 终止VLM守护';
+            } else {
+                btnStart.dataset.mode = 'start';
+                btnStart.innerHTML = '<i class="ri-play-fill"></i> 启动VLM守护';
+            }
+
+            if (taskRunning) {
+                btnManual.dataset.mode = 'cancel';
+                btnManual.innerHTML = '<i class="ri-close-circle-line"></i> 终止当前VLM';
+            } else {
+                btnManual.dataset.mode = 'run';
+                btnManual.innerHTML = '<i class="ri-rocket-2-line"></i> 测试VLM模式';
+            }
+        }
+
+        function updateVlmUi(mode) {
+            document.getElementById('vlm-scan-row').style.display = (mode === 'vlm' ? 'flex' : 'none');
+        }
+
+        function migrateWorkflowStepForEditor(step) {
+            const next = { ...step };
+            if (!next.coord && next.x !== undefined && next.y !== undefined && next.x !== '' && next.y !== '') {
+                next.coord = `${next.x},${next.y}`;
+            }
+            next.tap_start = next.tap_start || next.coord || '';
+            next.tap_end = next.tap_end || next.coord || '';
+            if (!next.from_coord && next.x1 !== undefined && next.y1 !== undefined && next.x1 !== '' && next.y1 !== '') {
+                next.from_coord = `${next.x1},${next.y1}`;
+            }
+            if (!next.to_coord && next.x2 !== undefined && next.y2 !== undefined && next.x2 !== '' && next.y2 !== '') {
+                next.to_coord = `${next.x2},${next.y2}`;
+            }
+            next.region_start = next.region_start || '';
+            next.region_end = next.region_end || '';
+            next.coord_group = next.coord_group || '';
+            next.condition_action = next.condition_action || 'region_recognize';
+            next.compare_operator = next.compare_operator || '=';
+            next.compare_value = next.compare_value || '';
+            next.compare_image = next.compare_image || '';
+            next.match_threshold = next.match_threshold || 0.78;
+            next.collapsed = next.collapsed === true;
+            next.delay_ms = next.delay_ms || (next.seconds ? Math.round(parseFloat(next.seconds) * 1000) : 1000);
+            next.children = Array.isArray(next.children) ? next.children.map(migrateWorkflowStepForEditor) : [];
+            return next;
+        }
+
+        function loadConfig() {
+            fetch('/api/config')
+                .then(res => res.json())
+                .then(data => {
+                    const dot = document.getElementById('engine-dot');
+                    const text = document.getElementById('engine-statusText');
+
+                    // 同步模式
+                    const stype = data.schedule_type || 'interval';
+                    document.getElementById('schedule-type-select').value = stype;
+                    GLOBAL_SCHEDULE_TIMES = data.schedule_times || ["09:00"];
+                    switchScheduleMode();
+
+                    if (data.is_running) {
+                        dot.className = 'status-dot active';
+                        text.innerText = (data.api_mode === 'vlm') ? '心跳守护中 (VLM 仿生)' : '心跳守护中';
+                        text.style.color = 'var(--text-main)';
+                    } else {
+                        dot.className = 'status-dot inactive';
+                        text.innerText = '引擎休眠挂起';
+                        text.style.color = 'var(--text-muted)';
+                    }
+                    syncActionButtons(false, data.is_running === true);
+
+                    document.getElementById('interval-input').value = data.interval_hours || 1;
+                    document.getElementById('test-limit').value = data.test_limit || 1;
+                    document.getElementById('show-browser-chk').checked = data.show_browser === true;
+                    document.getElementById('vlm-scan-count').value = data.scan_item_count || 5;
+                    GLOBAL_VLM_STEPS = Array.isArray(data.vlm_workflow_steps) ? data.vlm_workflow_steps.map(migrateWorkflowStepForEditor) : [];
+                    GLOBAL_VLM_COORD_GROUPS = data.vlm_coord_groups || {};
+                    if (data.pushplus_token) document.getElementById('pushplus-token').value = data.pushplus_token;
+                    if (data.rapidapi_key) document.getElementById('rapidapi-key').value = data.rapidapi_key;
+                    if (data.api_mode) document.getElementById('api-mode-select').value = data.api_mode;
+                    updateVlmUi(data.api_mode || 'playwright');
+
+                    // 恢复推送格式
+                    const fmt = data.push_format || 'html';
+                    document.querySelectorAll('input[name="push_format"]').forEach(radio => {
+                        radio.checked = (radio.value === fmt);
+                    });
+
+                    // 如果检测到引擎已在运行（可能是定点触发），自动开启状态轮询
+                    if (data.is_running) {
+                        startStatusPolling();
+                    }
+
+                    const urls = data.urls || [];
+                    GLOBAL_URLS = urls; // 存入全局方便复制
+                    document.getElementById('url-count').innerText = urls.length + ' URLs';
+                    const container = document.getElementById('url-list-container');
+
+                    if (urls.length === 0) {
+                        container.innerHTML = '<div style="color:var(--text-muted); font-size:0.75rem; text-align:center; padding:1rem;">探针池为空</div>';
+                    } else {
+                        container.innerHTML = urls.map((u, i) => {
+                            let urlStr = typeof u === 'string' ? u : u.url;
+                            const idx = i + 1;
+                            return `<div class="list-item">
+                                <div class="list-item-text" title="点击编号可快速复制 URL">
+                                    <span class="url-index" onclick="copyToClipboard('${urlStr}', ${idx})">#${idx}</span>
+                                    <span onclick="copyToClipboard('${urlStr}', ${idx})" style="cursor:pointer;">${urlStr}</span>
+                                </div>
+                                <div id="url-status-${idx}" style="flex-shrink:0;"></div>
+                                <button class="btn-icon-only" onclick="removeUrl(${i})"><i class="ri-close-line"></i></button>
+                            </div>`;
+                        }).join('');
+                    }
+                });
+        }
+
+        // -- Schedule Multi-Time Points
+        let GLOBAL_SCHEDULE_TIMES = [];
+
+        function switchScheduleMode() {
+            const mode = document.getElementById('schedule-type-select').value;
+            document.getElementById('ui-interval-mode').style.display = (mode === 'interval' ? 'flex' : 'none');
+            document.getElementById('ui-cron-mode').style.display = (mode === 'cron' ? 'flex' : 'none');
+            renderScheduleTimes();
+        }
+
+        function renderScheduleTimes() {
+            const container = document.getElementById('cron-time-list');
+            container.innerHTML = GLOBAL_SCHEDULE_TIMES.map((t, i) => `
+                <div style="background:var(--primary); color:#fff; padding:2px 8px; border-radius:4px; font-size:12px; display:flex; align-items:center; gap:5px;">
+                    <input type="time" value="${t}" onchange="updateTimePoint(${i}, this.value)" style="background:transparent; border:none; color:#fff; font-size:12px; outline:none; cursor:pointer;">
+                    <i class="ri-close-line" style="cursor:pointer;" onclick="removeTimePoint(${i})"></i>
+                </div>
+            `).join('');
+        }
+
+        function addTimePoint() {
+            GLOBAL_SCHEDULE_TIMES.push("09:00");
+            renderScheduleTimes(); // 立即渲染，不等服务器
+            saveSchedule();
+        }
+
+        function updateTimePoint(index, val) {
+            GLOBAL_SCHEDULE_TIMES[index] = val;
+            saveSchedule();
+            // 不进行即时重绘，防止正在输入时焦点丢失，除非是切换到其他输入框
+        }
+
+        function removeTimePoint(index) {
+            GLOBAL_SCHEDULE_TIMES.splice(index, 1);
+            renderScheduleTimes(); // 立即渲染
+            saveSchedule();
+        }
+
+        function saveSchedule() {
+            const stype = document.getElementById('schedule-type-select').value;
+            fetch('/api/config/schedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    schedule_type: stype,
+                    schedule_times: GLOBAL_SCHEDULE_TIMES
+                })
+            }).then(r => r.json()).then(data => {
+                if (!data.success) {
+                    log(`❌ 定时同步失败: ${data.msg}`, "err");
+                }
+            });
+        }
+
+        function switchScheduleModeAndSave() {
+            switchScheduleMode();
+            saveSchedule();
+        }
+
+        // 绑定下拉框更新
+        document.getElementById('schedule-type-select').onchange = switchScheduleModeAndSave;
+
+        function copyToClipboard(text, idx) {
+            navigator.clipboard.writeText(text).then(() => {
+                log(`已成功复制商品 #${idx} 的 URL 至剪贴板。`, "info");
+            });
+        }
+
+        function saveInterval() {
+            const val = document.getElementById('interval-input').value;
+            fetch('/api/config/interval', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ interval: val })
+            }).then(() => loadConfig());
+        }
+
+        function toggleEngine(action) {
+            return fetch('/api/engine/toggle', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: action })
+            }).then(r => r.json()).then(data => {
+                loadConfig();
+                if (data.msg) log(data.msg);
+                return data;
+            });
+        }
+
+        function requestCancel(stopScheduler = false) {
+            return fetch('/api/engine/cancel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ stop_scheduler: stopScheduler })
+            }).then(r => r.json()).then(data => {
+                if (data.msg) log(data.msg, "warn");
+                return data;
+            });
+        }
+
+        function ensureVlmMode() {
+            const select = document.getElementById('api-mode-select');
+            if (select.value === 'vlm') return Promise.resolve();
+            select.value = 'vlm';
+            return saveApiMode();
+        }
+
+        function handleGuardButton() {
+            fetch('/api/engine/status')
+                .then(r => r.json())
+                .then(status => {
+                    if (status.is_running || document.getElementById('btn-start').dataset.mode === 'stop') {
+                        return requestCancel(true).then(() => toggleEngine('stop')).then(() => syncActionButtons(false, false));
+                    }
+                    return ensureVlmMode().then(() => toggleEngine('start'));
+                });
+        }
+
+        function saveBrowserMode() {
+            const val = document.getElementById('show-browser-chk').checked;
+            fetch('/api/config/browser_mode', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ show_browser: val })
+            }).then(r => r.json()).then(data => log(data.msg));
+        }
+
+        function saveTestLimit() {
+            const val = document.getElementById('test-limit').value;
+            fetch('/api/config/test_limit', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ test_limit: parseInt(val) })
+            }).then(r => r.json()).then(data => log(`试跑限制已更新为: ${val}`));
+        }
+
+        function saveApiMode() {
+            const mode = document.getElementById('api-mode-select').value;
+            const scan_item_count = parseInt(document.getElementById('vlm-scan-count').value || '5');
+            updateVlmUi(mode);
+            return fetch('/api/config/keys', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ api_mode: mode, scan_item_count: scan_item_count })
+            }).then(r => r.json()).then(data => {
+                const modeLabel = mode === 'rapidapi'
+                    ? 'RapidAPI (高频)'
+                    : mode === 'onebound'
+                        ? 'Onebound (中频)'
+                        : mode === 'vlm'
+                            ? 'VLM 视觉仿生'
+                            : '本地探针';
+                log(`✅ 采集引擎已切换为: ${modeLabel}`);
+                loadConfig(); // 刷新状态显示
+                return data;
+            });
+        }
+
+        function saveRapidKey() {
+            const key = document.getElementById('rapidapi-key').value.trim();
+            fetch('/api/config/keys', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rapidapi_key: key })
+            }).then(r => r.json()).then(data => log("✅ RapidAPI Key 已加密同步。"));
+        }
+
+        function savePushToken() {
+            const token = document.getElementById('pushplus-token').value.trim();
+            // 复用 api_update_keys 逻辑，但仅更新推送 token
+            fetch('/api/config/keys', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: token })
+            }).then(r => r.json()).then(data => log("✅ 微信推送 Token 已加密同步。"));
+        }
+
+        function savePushFormat(fmt) {
+            fetch('/api/config/push_format', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ push_format: fmt })
+            }).then(r => r.json()).then(data => log(`✅ 推送模式已切换为: ${fmt === 'html' ? '聚合表格' : '普通消息'}`));
+        }
+
+        function triggerManual() {
+            if (document.getElementById('btn-manual').dataset.mode === 'cancel') {
+                requestCancel(false).then(() => {
+                    syncActionButtons(false, false);
+                });
+                return;
+            }
+
+            const limitVal = document.getElementById('test-limit').value || 1;
+            log(`手动指派数字人执行一轮全量抓取 (数量限制: ${limitVal})，请耐心等待终端返回...`);
+            const btnManual = document.getElementById('btn-manual');
+            ensureVlmMode().then(() => {
+                syncActionButtons(true, false);
+                fetch('/api/engine/run_now', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ limit: parseInt(limitVal) })
+                })
+                    .then(r => r.json()).then(data => {
+                        if (data.success) {
+                            log(data.msg, "info");
+                            startStatusPolling();
+                        } else {
+                            log(`❌ 启动失败: ${data.msg}`, "err");
+                            syncActionButtons(false, false);
+                        }
+                    })
+                    .catch(err => {
+                        log(`❌ 网络请求异常: ${err}`, "err");
+                        syncActionButtons(false, false);
+                    });
+            });
+        }
+
+        let statusInterval = null;
+        function startStatusPolling() {
+            if (statusInterval) clearInterval(statusInterval);
+            document.getElementById('batch-progress').style.display = 'block';
+            statusInterval = setInterval(checkBatchStatus, 2000);
+        }
+
+        function checkBatchStatus() {
+            fetch('/api/engine/status')
+                .then(r => r.json())
+                .then(data => {
+                    const wasRunning = document.getElementById('progress-text').innerText === "数字人巡航中...";
+                    const isFinished = !data.is_running && wasRunning;
+
+                    const percent = data.total > 0 ? Math.round((data.current / data.total) * 100) : 0;
+                    document.getElementById('progress-fill').style.width = percent + '%';
+                    document.getElementById('progress-percent').innerText = `${data.current}/${data.total} (${percent}%)`;
+                    document.getElementById('progress-text').innerText = data.is_running ? "数字人巡航中..." : "本轮巡航已完成";
+                    syncActionButtons(data.is_running, document.getElementById('btn-start').dataset.mode === 'stop');
+
+                    if (isFinished) {
+                        log("🎊 本轮采集已圆满结束，大盘数据已即时同步。");
+                        refreshCurrentTab();
+                        if (statusInterval) {
+                            setTimeout(() => { clearInterval(statusInterval); statusInterval = null; }, 5000); // 留存5秒状态后停止轮询
+                        }
+                    } else if (data.is_running && data.current > 0) {
+                        // 采集过程中也定期刷新，让用户看到新出的 SKU
+                        if (data.current % 5 === 0) refreshCurrentTab();
+                    }
+
+                    // 更新 URL 列表中的状态标签
+                    for (let idx in data.url_results) {
+                        const res = data.url_results[idx];
+                        const span = document.getElementById(`url-status-${idx}`);
+                        if (span) {
+                            span.innerHTML = res.success
+                                ? `<span class="url-status-tag success">✅ 成功</span>`
+                                : `<span class="url-status-tag fail" title="${res.msg}">❌ 失败</span>`;
+                        }
+                    }
+
+                    if (!data.is_running && data.current >= data.total && data.total > 0) {
+                        clearInterval(statusInterval);
+                        statusInterval = null;
+                        log(`✅ 全量采集完成！成功: ${data.success_count}, 失败: ${data.fail_count}`, "info");
+                        // 结束 3 秒后隐藏进度条并刷新数据
+                        setTimeout(() => {
+                            document.getElementById('batch-progress').style.display = 'none';
+                            refreshCurrentTab();
+                            syncActionButtons(false, false);
+                        }, 3000);
+                    }
+                });
+        }
+
+        const WORKFLOW_ACTION_META = {
+            launch_taobao: { label: '启动淘宝', fields: ['wait_after'] },
+            click_vlm: { label: '视觉点击', fields: ['keyword', 'wait_after', 'retries'] },
+            click_point: { label: '点击', fields: ['tap_start', 'tap_end', 'wait_after'] },
+            random_click: { label: '乱序点击', fields: ['coord_group', 'wait_after'] },
+            random_execute: { label: '随机执行', fields: [] },
+            if_condition: { label: 'if判断', fields: ['condition_action', 'compare_operator', 'compare_value', 'compare_image', 'match_threshold', 'region_start', 'region_end'] },
+            region_recognize: { label: '范围内识别', fields: ['compare_value', 'compare_image', 'match_threshold', 'region_start', 'region_end'] },
+            swipe: { label: '划动屏幕', fields: ['from_coord', 'to_coord', 'duration_ms', 'wait_after'] },
+            delay: { label: '延时', fields: ['delay_ms'] },
+            open_random_favorite: { label: '随机打开收藏商品', fields: ['wait_after'] },
+            open_sku_panel: { label: '展开SKU面板', fields: ['wait_after'] },
+            extract_skus: { label: '识别当前屏SKU', fields: ['region_start', 'region_end'] },
+            extract_skus_loop: { label: '循环识别SKU', fields: ['from_coord', 'to_coord', 'duration_ms', 'wait_after', 'max_scrolls', 'region_start', 'region_end'] },
+            back: { label: '返回', fields: ['wait_after'] },
+            home: { label: '回到桌面', fields: ['wait_after'] },
+            stop_taobao: { label: '结束淘宝进程', fields: ['wait_after'] },
+            noop: { label: '空操作', fields: [] }
+        };
+
+        let PICKER_STATE = {
+            open: false,
+            stepIndex: null,
+            field: null,
+            mode: null,
+            groupName: null,
+            start: null,
+            naturalWidth: 0,
+            naturalHeight: 0
+        };
+        let WORKFLOW_DRAG_STATE = {
+            sourcePath: null
+        };
+
+        function workflowActionOptions(selected) {
+            const options = [
+                ['click_vlm', '视觉点击'],
+                ['click_point', '点击'],
+                ['random_click', '乱序点击'],
+                ['random_execute', '随机执行'],
+                ['if_condition', 'if判断'],
+                ['region_recognize', '范围内识别'],
+                ['swipe', '划动屏幕'],
+                ['delay', '延时'],
+                ['open_random_favorite', '随机打开收藏商品'],
+                ['open_sku_panel', '展开 SKU 面板'],
+                ['extract_skus', '识别当前屏 SKU'],
+                ['extract_skus_loop', '循环翻页识别 SKU'],
+                ['back', '返回'],
+                ['home', '回桌面'],
+                ['stop_taobao', '结束淘宝进程'],
+                ['launch_taobao', '启动淘宝'],
+                ['noop', '空操作']
+            ];
+            return options.map(([value, label]) => `<option value="${value}" ${selected === value ? 'selected' : ''}>${label}</option>`).join('');
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        function renderFieldInput(path, step, field) {
+            const commonStyle = 'height:34px; font-size:12px;';
+            if (field === 'keyword') {
+                return `<input type="text" value="${escapeHtml(step.keyword || step.target_desc || '')}" placeholder="关键字，例如 共*款" style="width:190px; ${commonStyle}" onchange='updateWorkflowField(${pathToJs(path)}, "keyword", this.value)'>`;
+            }
+            if (field === 'tap_start' || field === 'tap_end') {
+                const label = field === 'tap_start' ? '范围左上' : '范围右下';
+                return `
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <input type="text" value="${escapeHtml(step[field] || '')}" placeholder="${label}" style="width:126px; ${commonStyle}" onchange='updateWorkflowField(${pathToJs(path)}, "${field}", this.value)'>
+                        <button class="btn-outline" style="padding:0 10px; height:34px;" onclick='openPickerModal(${pathToJs(path)}, "${field}", "point")' type="button">+</button>
+                    </div>
+                `;
+            }
+            if (field === 'coord_group') {
+                const options = Object.keys(GLOBAL_VLM_COORD_GROUPS).map(name =>
+                    `<option value="${escapeHtml(name)}" ${step.coord_group === name ? 'selected' : ''}>${escapeHtml(name)}</option>`
+                ).join('');
+                return `
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <select style="width:150px; ${commonStyle}" onchange='updateWorkflowField(${pathToJs(path)}, "coord_group", this.value)'>
+                            <option value="">选择坐标组</option>
+                            ${options}
+                        </select>
+                        <button class="btn-outline" style="padding:0 10px; height:34px;" onclick="openCoordGroupModal()" type="button">+</button>
+                    </div>
+                `;
+            }
+            if (field === 'condition_action') {
+                return `
+                    <select style="width:112px; ${commonStyle}" onchange='updateWorkflowField(${pathToJs(path)}, "condition_action", this.value)'>
+                        <option value="region_recognize" ${step.condition_action === 'region_recognize' ? 'selected' : ''}>范围内识别</option>
+                    </select>
+                `;
+            }
+            if (field === 'compare_operator') {
+                const operators = [
+                    ['=', '等于'],
+                    ['>=', '大于等于'],
+                    ['>', '大于'],
+                    ['<=', '小于等于'],
+                    ['<', '小于'],
+                    ['!=', '不等于']
+                ];
+                return `
+                    <select style="width:94px; ${commonStyle}" onchange='updateWorkflowField(${pathToJs(path)}, "compare_operator", this.value)'>
+                        ${operators.map(([value, label]) => `<option value="${value}" ${String(step.compare_operator || '=') === value ? 'selected' : ''}>${label}</option>`).join('')}
+                    </select>
+                `;
+            }
+            if (field === 'compare_value') {
+                return `<input type="text" value="${escapeHtml(step.compare_value || '')}" placeholder="判断值文本" style="width:140px; ${commonStyle}" onchange='updateWorkflowField(${pathToJs(path)}, "compare_value", this.value)'>`;
+            }
+            if (field === 'compare_image') {
+                const hasImage = !!step.compare_image;
+                return `
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <label class="btn-outline" style="height:34px; padding:0 10px; display:inline-flex; align-items:center; cursor:pointer;">
+                            <input type="file" accept="image/*" style="display:none;" onchange='handleWorkflowImageUpload(${pathToJs(path)}, "compare_image", this)'>
+                            ${hasImage ? '更换图片' : '上传图片'}
+                        </label>
+                        ${hasImage ? `<button class="btn-danger" style="height:34px; padding:0 10px;" onclick='clearWorkflowImage(${pathToJs(path)}, "compare_image")' type="button">清空</button>` : ''}
+                    </div>
+                `;
+            }
+            if (field === 'from_coord' || field === 'to_coord') {
+                const label = field === 'from_coord' ? '起点' : '终点';
+                return `
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <input type="text" value="${escapeHtml(step[field] || '')}" placeholder="${label} 500,300" style="width:118px; ${commonStyle}" onchange='updateWorkflowField(${pathToJs(path)}, "${field}", this.value)'>
+                        <button class="btn-outline" style="padding:0 10px; height:34px;" onclick='openPickerModal(${pathToJs(path)}, "${field}", "point")' type="button">+</button>
+                    </div>
+                `;
+            }
+            if (field === 'region_start' || field === 'region_end') {
+                const label = field === 'region_start' ? '范围左上' : '范围右下';
+                return `
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <input type="text" value="${escapeHtml(step[field] || '')}" placeholder="${label}" style="width:126px; ${commonStyle}" onchange='updateWorkflowField(${pathToJs(path)}, "${field}", this.value)'>
+                        <button class="btn-outline" style="padding:0 10px; height:34px;" onclick='openPickerModal(${pathToJs(path)}, "${field}", "point")' type="button">+</button>
+                    </div>
+                `;
+            }
+            if (field === 'delay_ms') {
+                return `<input type="number" value="${step.delay_ms ?? 1000}" placeholder="延时(ms)" style="width:88px; ${commonStyle}" onchange='updateWorkflowField(${pathToJs(path)}, "delay_ms", this.value)'>`;
+            }
+            if (field === 'wait_after') {
+                return `<input type="number" step="0.1" value="${step.wait_after ?? 1}" placeholder="延时秒" style="width:76px; ${commonStyle}" onchange='updateWorkflowField(${pathToJs(path)}, "wait_after", this.value)'>`;
+            }
+            if (field === 'retries') {
+                return `<input type="number" value="${step.retries ?? 3}" placeholder="重试" style="width:64px; ${commonStyle}" onchange='updateWorkflowField(${pathToJs(path)}, "retries", this.value)'>`;
+            }
+            if (field === 'duration_ms') {
+                return `<input type="number" value="${step.duration_ms ?? 500}" placeholder="滑动(ms)" style="width:86px; ${commonStyle}" onchange='updateWorkflowField(${pathToJs(path)}, "duration_ms", this.value)'>`;
+            }
+            if (field === 'max_scrolls') {
+                return `<input type="number" value="${step.max_scrolls ?? 8}" placeholder="翻页数" style="width:70px; ${commonStyle}" onchange='updateWorkflowField(${pathToJs(path)}, "max_scrolls", this.value)'>`;
+            }
+            if (field === 'match_threshold') {
+                return `<input type="number" step="0.01" min="0" max="1" value="${step.match_threshold ?? 0.78}" placeholder="阈值" style="width:74px; ${commonStyle}" onchange='updateWorkflowField(${pathToJs(path)}, "match_threshold", this.value)'>`;
+            }
+            return '';
+        }
+
+        function getWorkflowArray(path) {
+            if (!path) return GLOBAL_VLM_STEPS;
+            let current = GLOBAL_VLM_STEPS;
+            for (const idx of path) {
+                current[idx].children = Array.isArray(current[idx].children) ? current[idx].children : [];
+                current = current[idx].children;
+            }
+            return current;
+        }
+
+        function pathToJs(path) {
+            return JSON.stringify(path || []);
+        }
+
+        function sameWorkflowParentPath(pathA, pathB) {
+            if (!Array.isArray(pathA) || !Array.isArray(pathB) || pathA.length !== pathB.length) return false;
+            if (pathA.length <= 1) return true;
+            for (let i = 0; i < pathA.length - 1; i += 1) {
+                if (pathA[i] !== pathB[i]) return false;
+            }
+            return true;
+        }
+
+        function handleWorkflowDragStart(path, event) {
+            WORKFLOW_DRAG_STATE.sourcePath = [...path];
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', JSON.stringify(path));
+        }
+
+        function handleWorkflowDragOver(path, event) {
+            const sourcePath = WORKFLOW_DRAG_STATE.sourcePath;
+            if (!sourcePath || !sameWorkflowParentPath(sourcePath, path)) return;
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+        }
+
+        function moveWorkflowStep(sourcePath, targetPath, placeAfter = false) {
+            if (!sourcePath || !targetPath || !sameWorkflowParentPath(sourcePath, targetPath)) return;
+            const parentPath = sourcePath.slice(0, -1);
+            const arr = getWorkflowArray(parentPath);
+            const sourceIdx = sourcePath[sourcePath.length - 1];
+            let targetIdx = targetPath[targetPath.length - 1];
+            if (sourceIdx === targetIdx && !placeAfter) return;
+
+            const [moved] = arr.splice(sourceIdx, 1);
+            if (sourceIdx < targetIdx) targetIdx -= 1;
+            if (placeAfter) targetIdx += 1;
+            if (targetIdx < 0) targetIdx = 0;
+            if (targetIdx > arr.length) targetIdx = arr.length;
+            arr.splice(targetIdx, 0, moved);
+            renderWorkflowEditor();
+        }
+
+        function handleWorkflowDrop(path, event, placeAfter = false) {
+            const sourcePath = WORKFLOW_DRAG_STATE.sourcePath;
+            if (!sourcePath || !sameWorkflowParentPath(sourcePath, path)) return;
+            event.preventDefault();
+            moveWorkflowStep(sourcePath, path, placeAfter);
+            WORKFLOW_DRAG_STATE.sourcePath = null;
+        }
+
+        function handleWorkflowDragEnd() {
+            WORKFLOW_DRAG_STATE.sourcePath = null;
+        }
+
+        function renderWorkflowList(steps, path = []) {
+            const itemsHtml = steps.map((step, index) => renderWorkflowStep(step, index, path)).join('');
+            if (!steps.length) {
+                return '<div style="font-size:12px; color:var(--text-muted); border:1px dashed var(--border); border-radius:10px; padding:10px;">暂无步骤</div>';
+            }
+            const tailPath = [...path, steps.length - 1];
+            return `
+                ${itemsHtml}
+                <div style="height:18px; border:1px dashed rgba(139,92,246,0.25); border-radius:8px; background:rgba(139,92,246,0.04);"
+                    ondragover='handleWorkflowDragOver(${pathToJs(tailPath)}, event)'
+                    ondrop='handleWorkflowDrop(${pathToJs(tailPath)}, event, true)'></div>
+            `;
+        }
+
+        function renderWorkflowStep(step, index, path = []) {
+            const meta = WORKFLOW_ACTION_META[step.action] || { fields: [] };
+            const currentPath = [...path, index];
+            const fieldsHtml = meta.fields.map(field => renderFieldInput(currentPath, step, field)).join('');
+            const children = Array.isArray(step.children) ? step.children : [];
+            const hasChildrenPanel = ['random_execute', 'if_condition'].includes(step.action);
+            const childHint = step.action === 'if_condition'
+                ? '当判断命中时才执行以下子步骤。若子步骤里的“点击”未填坐标范围，将自动点击识别命中的区域。'
+                : '随机执行会从以下子步骤中随机挑一个执行，已执行过的子步骤不会重复。';
+            const childHtml = hasChildrenPanel
+                ? `
+                    <div style="grid-column:2 / 7; margin-top:8px; border-top:1px dashed var(--border); padding-top:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <div style="font-size:12px; color:var(--text-muted);">${childHint}</div>
+                            <button class="btn-outline" style="height:30px; font-size:12px;" onclick="addWorkflowChild(${pathToJs(currentPath)})" type="button">添加子步骤</button>
+                        </div>
+                        <div style="display:${step.collapsed ? 'none' : 'flex'}; flex-direction:column; gap:8px;">
+                            ${renderWorkflowList(children, currentPath)}
+                        </div>
+                    </div>
+                `
+                : '';
+
+            return `
+                <div style="display:grid; grid-template-columns:28px 36px 152px 150px minmax(0, 1fr) 74px 44px; gap:10px; align-items:start; border:1px solid var(--border); border-radius:10px; padding:10px; background:rgba(255,255,255,0.02);"
+                    ondragover='handleWorkflowDragOver(${pathToJs(currentPath)}, event)'
+                    ondrop='handleWorkflowDrop(${pathToJs(currentPath)}, event)'>
+                    <div draggable="true"
+                        ondragstart='handleWorkflowDragStart(${pathToJs(currentPath)}, event)'
+                        ondragend='handleWorkflowDragEnd()'
+                        title="拖拽排序"
+                        style="padding-top:7px; cursor:grab; color:var(--text-muted); text-align:center; user-select:none;">⋮⋮</div>
+                    <div style="padding-top:7px;"><input type="checkbox" ${step.enabled !== false ? 'checked' : ''} onchange='updateWorkflowField(${pathToJs(currentPath)}, "enabled", this.checked)'></div>
+                    <div style="display:flex; gap:6px; align-items:center; min-width:0;">
+                        ${hasChildrenPanel ? `<button class="btn-outline" style="height:30px; width:30px; padding:0;" onclick='toggleWorkflowChildren(${pathToJs(currentPath)})' type="button">${step.collapsed ? '+' : '-'}</button>` : '<div style="width:30px;"></div>'}
+                        <input type="text" value="${escapeHtml(step.name || '')}" placeholder="步骤名" style="height:34px; min-width:0; flex:1;" onchange='updateWorkflowField(${pathToJs(currentPath)}, "name", this.value)'>
+                    </div>
+                    <select onchange='updateWorkflowField(${pathToJs(currentPath)}, "action", this.value); renderWorkflowEditor();' style="height:34px; min-width:0;">${workflowActionOptions(step.action)}</select>
+                    <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; min-width:0;">${fieldsHtml}</div>
+                    <button class="btn-outline" style="height:34px; font-size:12px; padding:0 8px;" onclick='testWorkflowStep(${pathToJs(currentPath)})' type="button">试运行</button>
+                    <button class="btn-danger" style="padding:0; height:34px;" onclick='removeWorkflowStep(${pathToJs(currentPath)})' type="button"><i class="ri-delete-bin-7-line"></i></button>
+                    ${childHtml}
+                </div>
+            `;
+        }
+
+        function renderWorkflowEditor() {
+            const container = document.getElementById('workflow-step-body');
+            container.innerHTML = renderWorkflowList(GLOBAL_VLM_STEPS, []);
+        }
+
+        function getWorkflowStep(path) {
+            let current = GLOBAL_VLM_STEPS;
+            let step = null;
+            for (const idx of path) {
+                step = current[idx];
+                current = step.children || [];
+            }
+            return step;
+        }
+
+        function updateWorkflowField(path, key, value) {
+            const step = getWorkflowStep(path);
+            step[key] = value;
+        }
+
+        function toggleWorkflowChildren(path) {
+            const step = getWorkflowStep(path);
+            step.collapsed = !step.collapsed;
+            renderWorkflowEditor();
+        }
+
+        function clearWorkflowImage(path, key) {
+            updateWorkflowField(path, key, '');
+            renderWorkflowEditor();
+        }
+
+        function handleWorkflowImageUpload(path, key, input) {
+            const file = input.files && input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                updateWorkflowField(path, key, reader.result);
+                renderWorkflowEditor();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function addWorkflowStep() {
+            GLOBAL_VLM_STEPS.push(defaultWorkflowStep());
+            renderWorkflowEditor();
+        }
+
+        function addWorkflowChild(path) {
+            const parent = getWorkflowStep(path);
+            parent.children = Array.isArray(parent.children) ? parent.children : [];
+            parent.children.push(defaultWorkflowStep());
+            renderWorkflowEditor();
+        }
+
+        function removeWorkflowStep(path) {
+            const parentPath = path.slice(0, -1);
+            const idx = path[path.length - 1];
+            const arr = getWorkflowArray(parentPath);
+            arr.splice(idx, 1);
+            renderWorkflowEditor();
+        }
+
+        function openWorkflowEditor() {
+            if (!GLOBAL_VLM_STEPS.length) {
+                GLOBAL_VLM_STEPS = [
+                    { id: 'launch_taobao', enabled: true, name: '启动淘宝 App', action: 'launch_taobao', wait_after: 4 },
+                    { id: 'tap_my_tab', enabled: true, name: '点击我的', action: 'click_vlm', keyword: '我的*', retries: 3, wait_after: 2.5 },
+                    { id: 'tap_favorites', enabled: true, name: '点击收藏', action: 'click_vlm', keyword: '收藏*', retries: 3, wait_after: 3 },
+                    {
+                        id: 'random_product',
+                        enabled: true,
+                        name: '随机执行',
+                        action: 'random_execute',
+                        children: [
+                            { id: 'open_random_favorite', enabled: true, name: '随机打开一个收藏商品', action: 'open_random_favorite', wait_after: 4 }
+                        ]
+                    },
+                    { id: 'swipe_after_open', enabled: true, name: '进入商品后下滑约100像素', action: 'swipe', from_coord: '600,1900', to_coord: '600,1800', duration_ms: 350, wait_after: 1.2 },
+                    { id: 'open_sku_panel', enabled: true, name: '点击共xx款展开 SKU', action: 'click_vlm', keyword: '共*款', retries: 3, wait_after: 2.5 },
+                    { id: 'extract_skus_loop', enabled: true, name: '循环翻页识别全部 SKU', action: 'extract_skus_loop', from_coord: '600,2050', to_coord: '600,900', duration_ms: 500, wait_after: 1.3, max_scrolls: 8, region_start: '', region_end: '' }
+                ];
+            }
+            renderWorkflowEditor();
+            document.getElementById('workflow-modal').style.display = 'flex';
+        }
+
+        function closeWorkflowEditor() {
+            document.getElementById('workflow-modal').style.display = 'none';
+        }
+
+        function normalizeWorkflowStepsFromStep(step) {
+            return {
+                ...step,
+                coord: step.coord || '',
+                tap_start: step.tap_start || step.coord || '',
+                tap_end: step.tap_end || step.coord || '',
+                coord_group: step.coord_group || '',
+                from_coord: step.from_coord || '',
+                to_coord: step.to_coord || '',
+                region_start: step.region_start || '',
+                region_end: step.region_end || '',
+                condition_action: step.condition_action || 'region_recognize',
+                compare_operator: step.compare_operator || '=',
+                compare_value: step.compare_value || '',
+                compare_image: step.compare_image || '',
+                match_threshold: parseFloat(step.match_threshold || 0.78),
+                collapsed: step.collapsed === true,
+                delay_ms: parseInt(step.delay_ms || 1000, 10),
+                wait_after: parseFloat(step.wait_after || 0),
+                duration_ms: parseInt(step.duration_ms || 500, 10),
+                retries: parseInt(step.retries || 3, 10),
+                max_scrolls: parseInt(step.max_scrolls || 8, 10),
+                keyword: step.keyword || step.target_desc || '',
+                target_desc: step.target_desc || '',
+                children: Array.isArray(step.children) ? step.children.map(normalizeWorkflowStepsFromStep) : []
+            };
+        }
+
+        function normalizeWorkflowSteps() {
+            return GLOBAL_VLM_STEPS.map(normalizeWorkflowStepsFromStep);
+        }
+
+        function closePickerModal() {
+            document.getElementById('picker-modal').style.display = 'none';
+            document.getElementById('picker-rect').style.display = 'none';
+            PICKER_STATE = { open: false, stepIndex: null, field: null, mode: null, groupName: null, start: null, naturalWidth: 0, naturalHeight: 0 };
+        }
+
+        function pickerImagePoint(event) {
+            const img = document.getElementById('picker-image');
+            const rect = img.getBoundingClientRect();
+            const displayX = Math.max(0, Math.min(event.clientX - rect.left, rect.width));
+            const displayY = Math.max(0, Math.min(event.clientY - rect.top, rect.height));
+            const x = Math.round(displayX / rect.width * PICKER_STATE.naturalWidth);
+            const y = Math.round(displayY / rect.height * PICKER_STATE.naturalHeight);
+            return { x, y, displayX, displayY, imgRect: rect };
+        }
+
+        function openPickerModal(stepIndex, field, mode, extra = {}) {
+            PICKER_STATE.open = true;
+            PICKER_STATE.stepIndex = stepIndex;
+            PICKER_STATE.field = field;
+            PICKER_STATE.mode = mode;
+            PICKER_STATE.groupName = extra.groupName || null;
+            PICKER_STATE.start = null;
+            document.getElementById('picker-hint').innerText = mode === 'range'
+                ? '按住鼠标左键在截图上拖拽，系统会自动填入范围左上角和右下角坐标。'
+                : mode === 'multi_point_group'
+                    ? '可连续点击多个位置取坐标，系统会自动用分号拼接。关闭窗口即完成取点。'
+                    : '在截图上点击一下，系统会自动填入坐标。';
+            document.getElementById('picker-modal').style.display = 'flex';
+            fetch('/api/vlm/current_screen')
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success) {
+                        throw new Error(data.msg || '截图失败');
+                    }
+                    const img = document.getElementById('picker-image');
+                    img.src = `data:image/png;base64,${data.image_base64}`;
+                    PICKER_STATE.naturalWidth = data.width;
+                    PICKER_STATE.naturalHeight = data.height;
+                })
+                .catch(err => {
+                    log(`❌ 获取当前手机截图失败: ${err.message || err}`, 'err');
+                    closePickerModal();
+                });
+        }
+
+        function drawPickerRect(start, current) {
+            const rect = document.getElementById('picker-rect');
+            rect.style.display = 'block';
+            rect.style.left = Math.min(start.displayX, current.displayX) + 'px';
+            rect.style.top = Math.min(start.displayY, current.displayY) + 'px';
+            rect.style.width = Math.abs(start.displayX - current.displayX) + 'px';
+            rect.style.height = Math.abs(start.displayY - current.displayY) + 'px';
+        }
+
+        function saveWorkflowSteps() {
+            const payload = normalizeWorkflowSteps();
+            const btn = document.getElementById('btn-save-workflow');
+            btn.disabled = true;
+            fetch('/api/config/vlm_workflow', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ steps: payload, coord_groups: GLOBAL_VLM_COORD_GROUPS })
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    log('✅ VLM 流程配置已保存');
+                    loadConfig();
+                } else {
+                    log(`❌ 保存 VLM 流程失败: ${data.msg}`, "err");
+                }
+            }).finally(() => {
+                btn.disabled = false;
+            });
+        }
+
+        function closeStepPreview() {
+            document.getElementById('step-preview-modal').style.display = 'none';
+        }
+
+        function showStepPreview(result) {
+            const body = document.getElementById('step-preview-body');
+            const logsHtml = (result.logs || []).map(line => `<div style="font-family:var(--font-mono); font-size:12px; color:var(--text-muted);">${escapeHtml(line)}</div>`).join('');
+            if (result.preview_type === 'sku_preview') {
+                const reviewRows = (result.review_rows || result.skus || []).map(sku => `
+                    <tr>
+                        <td style="padding:8px; border-top:1px solid var(--border); text-align:right;">${sku.page ?? '-'}</td>
+                        <td style="padding:8px; border-top:1px solid var(--border);">${escapeHtml(sku.raw_text || '')}</td>
+                        <td style="padding:8px; border-top:1px solid var(--border);">${escapeHtml(sku.name || '')}</td>
+                        <td style="padding:8px; border-top:1px solid var(--border); text-align:right;">${sku.price ?? '-'}</td>
+                        <td style="padding:8px; border-top:1px solid var(--border); text-align:right;">${sku.original_price ?? '-'}</td>
+                        <td style="padding:8px; border-top:1px solid var(--border); text-align:right;">${sku.stock ?? '-'}</td>
+                        <td style="padding:8px; border-top:1px solid var(--border);">${escapeHtml(sku.process || '')}</td>
+                        <td style="padding:8px; border-top:1px solid var(--border);">${escapeHtml(sku.process_note || '')}</td>
+                    </tr>
+                `).join('');
+                const recordHtml = (result.record_paths || []).map(path => `
+                    <div style="font-family:var(--font-mono); font-size:12px; color:var(--text-muted);">${escapeHtml(path)}</div>
+                `).join('');
+                body.innerHTML = `
+                    <div><strong>商品：</strong>${escapeHtml(result.title || '未知商品')}</div>
+                    <div><strong>店铺：</strong>${escapeHtml(result.shop_name || '未知店铺')}</div>
+                    <div><strong>识别到 SKU 数：</strong>${(result.skus || []).length}</div>
+                    <div><strong>原始识别行数：</strong>${(result.review_rows || []).length}</div>
+                    <div>${recordHtml}</div>
+                    <div style="overflow:auto; border:1px solid var(--border); border-radius:10px;">
+                        <table style="width:100%; border-collapse:collapse;">
+                            <thead><tr><th style="padding:8px; text-align:right;">页</th><th style="padding:8px; text-align:left;">原始信息</th><th style="padding:8px; text-align:left;">SKU</th><th style="padding:8px; text-align:right;">价格</th><th style="padding:8px; text-align:right;">原价</th><th style="padding:8px; text-align:right;">库存</th><th style="padding:8px; text-align:left;">处理</th><th style="padding:8px; text-align:left;">处理说明</th></tr></thead>
+                            <tbody>${reviewRows || '<tr><td colspan="8" style="padding:10px;">未识别到 SKU</td></tr>'}</tbody>
+                        </table>
+                    </div>
+                    <div>${logsHtml}</div>
+                `;
+            } else if (result.preview_type === 'condition_preview') {
+                const data = result.result || {};
+                const condition = data.condition_result || data;
+                const bounds = condition.bounds ? `${condition.bounds[0]},${condition.bounds[1]} ~ ${condition.bounds[2]},${condition.bounds[3]}` : '未定位到区域';
+                body.innerHTML = `
+                    <div><strong>判断结果：</strong>${condition.matched ? '命中' : '未命中'}</div>
+                    <div><strong>方式：</strong>${escapeHtml(condition.method || '-')}</div>
+                    <div><strong>说明：</strong>${escapeHtml(condition.reason || '-')}</div>
+                    <div><strong>识别文本：</strong>${escapeHtml(condition.raw_text || '-')}</div>
+                    <div><strong>命中范围：</strong>${escapeHtml(bounds)}</div>
+                    <div style="font-family:var(--font-mono); font-size:12px;">${escapeHtml(JSON.stringify(data, null, 2))}</div>
+                    <div>${logsHtml}</div>
+                `;
+            } else {
+                body.innerHTML = `
+                    <div><strong>执行结果：</strong>${result.success ? '成功' : '失败'}</div>
+                    <div style="font-family:var(--font-mono); font-size:12px;">${escapeHtml(JSON.stringify(result.result ?? {}, null, 2))}</div>
+                    <div>${logsHtml}</div>
+                `;
+            }
+            document.getElementById('step-preview-modal').style.display = 'flex';
+        }
+
+        function testWorkflowStep(path) {
+            const step = normalizeWorkflowStepsFromStep(JSON.parse(JSON.stringify(getWorkflowStep(path))));
+            fetch('/api/vlm/test_step', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ step })
+            }).then(r => r.json()).then(data => {
+                if (!data.success) {
+                    log(`❌ 单步试运行失败: ${data.msg || '未知错误'}`, 'err');
+                    return;
+                }
+                showStepPreview(data);
+            }).catch(err => {
+                log(`❌ 单步试运行请求失败: ${err}`, 'err');
+            });
+        }
+
+        function renderCoordGroups() {
+            const container = document.getElementById('coord-group-list');
+            const entries = Object.entries(GLOBAL_VLM_COORD_GROUPS || {});
+            container.innerHTML = entries.map(([name, value]) => `
+                <div style="display:grid; grid-template-columns:180px 1fr 52px; gap:10px; align-items:start;">
+                    <input type="text" value="${escapeHtml(name)}" style="height:34px;" onchange="renameCoordGroup('${escapeHtml(name)}', this.value)">
+                    <textarea style="min-height:72px; padding:8px;" onchange="updateCoordGroupValue('${escapeHtml(name)}', this.value)">${escapeHtml(Array.isArray(value) ? value.join(';') : value || '')}</textarea>
+                    <div style="display:flex; flex-direction:column; gap:8px; align-items:stretch;">
+                        <button class="btn-outline" style="height:34px;" onclick="openPickerModal(null, null, 'multi_point_group', { groupName: '${escapeHtml(name)}' })" type="button">+</button>
+                        <button class="btn-danger" style="height:34px;" onclick="removeCoordGroup('${escapeHtml(name)}')"><i class="ri-delete-bin-7-line"></i></button>
+                    </div>
+                </div>
+            `).join('') || '<div style="font-size:12px;color:var(--text-muted);">暂无坐标组</div>';
+        }
+
+        function openCoordGroupModal() {
+            renderCoordGroups();
+            document.getElementById('coord-group-modal').style.display = 'flex';
+        }
+
+        function closeCoordGroupModal() {
+            document.getElementById('coord-group-modal').style.display = 'none';
+        }
+
+        function addCoordGroup() {
+            let base = 'coord_group';
+            let i = 1;
+            while (GLOBAL_VLM_COORD_GROUPS[`${base}_${i}`]) i += 1;
+            GLOBAL_VLM_COORD_GROUPS[`${base}_${i}`] = '';
+            renderCoordGroups();
+        }
+
+        function renameCoordGroup(oldName, newName) {
+            newName = (newName || '').trim();
+            if (!newName || oldName === newName) return;
+            if (GLOBAL_VLM_COORD_GROUPS[newName]) {
+                log(`❌ 坐标组名称已存在: ${newName}`, 'err');
+                renderCoordGroups();
+                return;
+            }
+            GLOBAL_VLM_COORD_GROUPS[newName] = GLOBAL_VLM_COORD_GROUPS[oldName];
+            delete GLOBAL_VLM_COORD_GROUPS[oldName];
+            renderCoordGroups();
+        }
+
+        function updateCoordGroupValue(name, value) {
+            GLOBAL_VLM_COORD_GROUPS[name] = value;
+        }
+
+        function removeCoordGroup(name) {
+            delete GLOBAL_VLM_COORD_GROUPS[name];
+            renderCoordGroups();
+        }
+
+        function testWechat() {
+            const btn = document.getElementById('btn-wechat');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i> 发送中...';
+            fetch('/api/test/notify', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+                .then(r => r.json()).then(data => {
+                    if (data.success) log("微信推送测试成功！", "info");
+                    else log("微信推送失败: " + data.msg, "err");
+                }).finally(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ri-wechat-line"></i> 测试微信';
+                });
+        }
+
+        function addUrl() {
+            const input = document.getElementById('new-url');
+            if (!input.value) return;
+            fetch('/api/config/url', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'add', url: input.value.trim() })
+            }).then(() => { input.value = ''; loadConfig(); });
+        }
+
+        function removeUrl(index) {
+            fetch('/api/config/url', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'remove', index: index })
+            }).then(() => loadConfig());
+        }
+
+        document.getElementById('new-url').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') addUrl();
+        });
+
+        // -- Data Assets Rendering
+        let currentTab = 'price-changes';
+        let historyLoaded = false;
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+            document.getElementById('tab-price-changes').classList.toggle('active', tab === 'price-changes');
+            document.getElementById('tab-full-history').classList.toggle('active', tab === 'full-history');
+            if (tab === 'full-history' && !historyLoaded) { loadHistory(); historyLoaded = true; }
+        }
+
+        function copyShareLink() {
+            // 自动捕获当前访问的域名（无论是 localhost 还是 cpolar 公网域名）
+            const url = window.location.origin + '/share/dashboard';
+            navigator.clipboard.writeText(url).then(() => {
+                log(`✅ 已完成分享链接复制：${url}`, "info");
+                log(`>> 您可以将此链接发送给他人，即可在公网免登查阅数据资产。`, "info");
+            });
+        }
+
+        function refreshCurrentTab() {
+            currentTab === 'price-changes' ? loadPriceChanges() : loadHistory();
+        }
+
+        function timeAgo(dateStr) {
+            if (!dateStr || dateStr === '-') return '-';
+            try {
+                const date = new Date(dateStr.replace(/-/g, '/'));
+                const now = new Date();
+                const seconds = Math.floor((now - date) / 1000);
+                if (seconds < 0) return '刚刚';
+                if (seconds < 60) return '刚刚';
+                const minutes = Math.floor(seconds / 60);
+                if (minutes < 60) return minutes + '分钟前';
+                const hours = Math.floor(minutes / 60);
+                if (hours < 24) return hours + '小时前';
+                const days = Math.floor(hours / 24);
+                if (days < 30) return days + '天前';
+                return dateStr.split(' ')[0]; // 超过一个月显示日期
+            } catch (e) { return dateStr; }
+        }
+
+        function toggleTimeline(idx) {
+            const row = document.getElementById('sku-row-' + idx);
+            const panel = document.getElementById('timeline-' + idx);
+            if (panel.classList.contains('open')) {
+                panel.classList.remove('open'); row.classList.remove('expanded');
+            } else {
+                panel.classList.add('open'); row.classList.add('expanded');
+            }
+        }
+
+        function loadPriceChanges() {
+            const container = document.getElementById('sku-list-container');
+            fetch('/api/price_changes').then(r => r.json()).then(data => {
+                if (data.error) {
+                    container.innerHTML = `<div class="empty-state"><p>${data.error}</p></div>`;
+                    return;
+                }
+                const groups = data.sku_groups || [];
+                document.getElementById('stat-total').textContent = groups.length;
+                document.getElementById('stat-url-total').textContent = data.url_total || 0;
+                document.getElementById('stat-changed').textContent = groups.filter(g => g.has_latest_change).length;
+                document.getElementById('stat-time').textContent = data.last_fetch_time || '-';
+
+                if (groups.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><p>暂无价格记录流</p></div>'; return;
+                }
+
+                container.innerHTML = groups.map((g, idx) => {
+                    const tl = g.timeline || [];
+                    const lastEntry = tl.length >= 2 ? tl[tl.length - 1] : null;
+                    let diffHtml = '<span class="sku-diff flat">—</span>';
+                    let priceColor = 'var(--text-main)';
+
+                    if (g.is_off_shelf) {
+                        diffHtml = '<span class="sku-diff" style="background:rgba(239, 68, 68, 0.2); color:var(--danger); border:1px solid rgba(239, 68, 68, 0.3);">下架</span>';
+                        priceColor = 'var(--text-muted)';
+                    } else if (lastEntry && lastEntry.diff) {
+                        const isUp = lastEntry.diff > 0;
+                        diffHtml = `<span class="sku-diff ${isUp ? 'up' : 'down'}">${isUp ? '↑' : '↓'} ${Math.abs(lastEntry.diff).toFixed(2)}</span>`;
+                        priceColor = isUp ? 'var(--danger)' : 'var(--success)';
+                    } else if (tl.length < 2) {
+                        diffHtml = '<span class="sku-diff flat">首次记录</span>';
+                    }
+
+                    const tlHtml = tl.map(entry => {
+                        let innerDiff = entry.diff ? (entry.diff > 0 ? `<span style="color:var(--danger)">↑ +${entry.diff}</span>` : `<span style="color:var(--success)">↓ ${entry.diff}</span>`) : `<span style="color:var(--text-muted)">基准</span>`;
+                        return `<div class="tl-row"><span class="tl-time">${entry.time}</span><span>￥${entry.price}</span>${innerDiff}</div>`;
+                    }).join('');
+
+                    return `
+                        <div class="sku-row ${g.has_latest_change ? 'changed' : ''}" onclick="toggleTimeline(${idx})" id="sku-row-${idx}">
+                            <div class="shop-name" title="${g.shop}">${g.shop}</div>
+                            <div title="${g.product}" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                <span class="url-index" title="点击复制原 URL" onclick="event.stopPropagation(); copyToClipboard('${g.source_url || ""}', ${g.url_no || "?"})">#${g.url_no || "?"}</span>
+                                <a href="${g.source_url}" target="_blank" onclick="event.stopPropagation()" style="color:inherit;text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                                    ${g.product}
+                                </a>
+                            </div>
+                            <div title="${g.sku}"><span style="background:rgba(255,255,255,0.05);padding:0.2rem 0.5rem;border-radius:4px;">${g.sku}</span></div>
+                            <div style="text-align:right; color:var(--text-muted); font-size:0.75rem;">${timeAgo(g.timeline[g.timeline.length - 1].time)}</div>
+                            <div class="sku-price" style="color: ${priceColor}">¥${g.latest_price.toFixed(2)}</div>
+                            <div style="text-align:center;">${g.latest_stock || 0}</div>
+                            <div style="text-align:right;">${diffHtml}</div>
+                            <div class="sku-chevron"><i class="ri-arrow-down-s-line"></i></div>
+                        </div>
+                        <div class="timeline-panel" id="timeline-${idx}">${tlHtml}</div>
+                    `;
+                }).join('');
+            });
+        }
+
+        function loadHistory() {
+            fetch('/api/history').then(r => r.json()).then(data => {
+                const tbody = document.getElementById('history-tbody');
+                const theadRow = document.querySelector('#history-thead tr');
+                if (data.error || !data.records || data.records.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><p>Excel 归档数据库空白或读取异常</p></div></td></tr>`;
+                    return;
+                }
+
+                const firstRow = data.records[0];
+                const fixedCols = ['获取时间', '店铺名称', '商品名称', '商品规格'];
+                const dynamicCols = Object.keys(firstRow).filter(k => !fixedCols.includes(k) && k !== '指纹' && k !== 'Unnamed: 0');
+
+                theadRow.innerHTML = `<th>入库时间戳</th><th>店铺信标</th><th>商品名</th><th>SKU特征</th>` +
+                    dynamicCols.map(c => `<th style="text-align:right;">${c}</th>`).join('');
+
+                tbody.innerHTML = data.records.map(row => {
+                    let dColsHTML = dynamicCols.map(c => `<td style="text-align:right; font-family:var(--font-mono);">${row[c] || '-'}</td>`).join('');
+                    return `<tr>
+                        <td style="color:var(--text-muted);">${row['获取时间']}</td>
+                        <td>${row['店铺名称'] || '-'}</td>
+                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row['商品名称']}">${row['商品名称']}</td>
+                        <td><span style="background:rgba(255,255,255,0.05);padding:0.2rem 0.5rem;border-radius:4px;">${row['商品规格'] || '标配'}</span></td>
+                        ${dColsHTML}
+                    </tr>`;
+                }).join('');
+            });
+        }
+
+        // Initialize Call
+        checkAuthStatus();
+        loadConfig();
+        loadPriceChanges();
+        // --- Rich Text Template Editor Logic
+        let quill = null;
+        function initQuill() {
+            if (quill) return;
+            quill = new Quill('#editor-container', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        ['clean']
+                    ]
+                }
+            });
+        }
+
+        function openTemplateEditor() {
+            initQuill();
+            document.getElementById('template-modal').style.display = 'flex';
+            // 从全局配置或后端拉取当前模板
+            fetch('/api/config').then(r => r.json()).then(data => {
+                const tpl = data.custom_push_template || "";
+                if (tpl) {
+                    quill.clipboard.dangerouslyPasteHTML(tpl);
+                } else {
+                    // 默认起手式
+                    const defaultHint = "<p><strong>【变价提醒】</strong></p><p>检测到以下商品价格波动：</p>{{item_loop_start}}<p>店铺：{{店铺名称}}<br>商品：{{商品名称}}<br>规格：{{规格}}<br>价格：<s>{{旧价格}}</s> → <span style='color: {{趋势颜色}};'>{{新价格}}</span> ({{趋势图标}} {{变动幅度}})</p>{{item_loop_end}}<p>检测时间：{{检测时间}}</p>";
+                    quill.clipboard.dangerouslyPasteHTML(defaultHint);
+                }
+            });
+        }
+
+        function closeTemplateEditor() {
+            document.getElementById('template-modal').style.display = 'none';
+        }
+
+        function insertVar(varName, event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            if (!quill) return;
+
+            // 获取当前选择范围
+            let range = quill.getSelection();
+            if (!range) {
+                // 如果没有焦点，默认插到最后
+                range = { index: quill.getLength() - 1, length: 0 };
+            }
+
+            quill.insertText(range.index, varName);
+            quill.setSelection(range.index + varName.length);
+            // 延迟一丢丢重新聚焦，确保交互顺滑
+            setTimeout(() => quill.focus(), 10);
+        }
+
+        function saveCustomTemplate() {
+            const html = quill.root.innerHTML;
+            const btn = document.getElementById('btn-save-template');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line spin"></i> 保存中...';
+
+            fetch('/api/config/push_template', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ push_template: html })
+            }).then(r => r.json()).then(data => {
+                log("✅ 微信推送自定义模板已生效");
+                closeTemplateEditor();
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ri-save-line"></i> 保存模板并应用';
+            }).catch(err => {
+                log("❌ 模板保存失败: " + err, "err");
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ri-save-line"></i> 保存模板并应用';
+            });
+        }
+
+        function resetTemplateToDefault() {
+            if (confirm("确定要放弃自定义模板，恢复系统默认的聚合表格样式吗？")) {
+                fetch('/api/config/push_template', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ push_template: "" })
+                }).then(() => {
+                    log("✅ 已恢复系统默认表格模板");
+                    closeTemplateEditor();
+                });
+            }
+        }
+        function clearAllUrls() {
+            if (confirm("确定要清空目标池中的所有 URL 吗？此操作不可撤销。")) {
+                fetch('/api/config/url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'clear' })
+                }).then(r => r.json()).then(data => {
+                    log("✅ 目标池已完成清空");
+                    loadConfig();
+                });
+            }
+        }
+
+        function openBulkImport() {
+            document.getElementById('bulk-modal').style.display = 'flex';
+            document.getElementById('bulk-urls-input').value = '';
+            document.getElementById('bulk-status').innerHTML = '';
+            document.getElementById('bulk-urls-input').focus();
+        }
+
+        function closeBulkImport() {
+            document.getElementById('bulk-modal').style.display = 'none';
+        }
+
+        function doBulkImport() {
+            const text = document.getElementById('bulk-urls-input').value;
+            const urls = text.split('\n').map(u => u.trim()).filter(u => u.length > 0);
+
+            if (urls.length === 0) {
+                alert("请输入至少一个有效的 URL");
+                return;
+            }
+
+            const btn = document.getElementById('btn-do-bulk');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line spin"></i> 导入中...';
+
+            fetch('/api/config/urls/batch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ urls: urls })
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    log(`✅ 成功批量导入 ${data.added} 个新链接（当前共 ${data.total} 个）`);
+                    loadConfig();
+                    closeBulkImport();
+                } else {
+                    alert("导入失败: " + (data.msg || "未知错误"));
+                }
+            }).catch(err => {
+                alert("网络请求失败");
+            }).finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '确认导入';
+            });
+        }
+
+        const pickerImageEl = document.getElementById('picker-image');
+        pickerImageEl.addEventListener('click', (event) => {
+            if (!PICKER_STATE.open || !['point', 'multi_point_group'].includes(PICKER_STATE.mode)) return;
+            const point = pickerImagePoint(event);
+            if (PICKER_STATE.mode === 'multi_point_group') {
+                const currentValue = GLOBAL_VLM_COORD_GROUPS[PICKER_STATE.groupName] || '';
+                const nextPoint = `${point.x},${point.y}`;
+                GLOBAL_VLM_COORD_GROUPS[PICKER_STATE.groupName] = currentValue ? `${currentValue};${nextPoint}` : nextPoint;
+                renderCoordGroups();
+                document.getElementById('picker-hint').innerText = `已追加坐标 ${nextPoint}，可继续点击更多位置，关闭窗口即完成。`;
+                return;
+            }
+
+            updateWorkflowField(PICKER_STATE.stepIndex, PICKER_STATE.field, `${point.x},${point.y}`);
+            renderWorkflowEditor();
+            closePickerModal();
+        });
+
+        pickerImageEl.addEventListener('mousedown', (event) => {
+            if (!PICKER_STATE.open || PICKER_STATE.mode !== 'range') return;
+            PICKER_STATE.start = pickerImagePoint(event);
+            drawPickerRect(PICKER_STATE.start, PICKER_STATE.start);
+            event.preventDefault();
+        });
+
+        pickerImageEl.addEventListener('mousemove', (event) => {
+            if (!PICKER_STATE.open || PICKER_STATE.mode !== 'range' || !PICKER_STATE.start) return;
+            drawPickerRect(PICKER_STATE.start, pickerImagePoint(event));
+        });
+
+        window.addEventListener('mouseup', (event) => {
+            if (!PICKER_STATE.open || PICKER_STATE.mode !== 'range' || !PICKER_STATE.start) return;
+            const point = pickerImagePoint(event);
+            const x1 = Math.min(PICKER_STATE.start.x, point.x);
+            const y1 = Math.min(PICKER_STATE.start.y, point.y);
+            const x2 = Math.max(PICKER_STATE.start.x, point.x);
+            const y2 = Math.max(PICKER_STATE.start.y, point.y);
+            updateWorkflowField(PICKER_STATE.stepIndex, 'region_start', `${x1},${y1}`);
+            updateWorkflowField(PICKER_STATE.stepIndex, 'region_end', `${x2},${y2}`);
+            renderWorkflowEditor();
+            closePickerModal();
+        });
+    </script>
+</body>
+
+</html>

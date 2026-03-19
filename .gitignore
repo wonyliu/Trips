@@ -1,0 +1,23 @@
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+*.tmp
+
+# Local env/config
+.env
+**/.env
+
+# Local browser/device profiles
+.chrome-ocr-profile/
+.price-agent-mobile/
+.price-agent-profile/
+
+# Debug outputs
+logs-*.txt
+*.png
+mobile-workflow-tool/records/
+
+# Local tools
+scrcpy-win64-v3.3.4/

@@ -1,0 +1,2272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>淘宝竞品价格监控 | 进阶控制终端</title>
+    <!-- 全球顶级的干净字体族 Inter 带来高级的数理排版观感 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 使用优质矢量图库库代替老旧字体图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            /* 优雅的靛蓝色 */
+            --primary-hover: #4338CA;
+            --success: #10B981;
+            /* 薄荷绿 */
+            --success-glow: rgba(16, 185, 129, 0.3);
+            --danger: #EF4444;
+            /* 珊瑚红 */
+            --warning: #F59E0B;
+            /* 琥珀金 */
+            --bg-color: #F8FAFC;
+            /* 极浅灰蓝底色，高级通透 */
+            --surface: #FFFFFF;
+            --surface-hover: #F9FAFB;
+            --text-main: #0F172A;
+            /* 深海墨蓝字色 */
+            --text-muted: #64748B;
+            --border: #E2E8F0;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            --shadow-glow: 0 0 20px rgba(79, 70, 229, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            /* 细致的光晕背景叠加，增强空间感和专业感 */
+            background-image:
+                radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 0.02) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(225, 39%, 30%, 0.02) 0, transparent 50%);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 2.5rem 3rem;
+        }
+
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 2rem;
+        }
+
+        /* ----- 头部标题栏 ----- */
+        .header-area {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            letter-spacing: -0.5px;
+        }
+
+        .logo a.advanced-link {
+            font-size: 0.875rem;
+            background: rgba(139, 92, 246, 0.1);
+            color: #8B5CF6;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 1rem;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .logo a.advanced-link:hover {
+            background: #8B5CF6;
+            color: #fff;
+        }
+
+        .logo i {
+            color: var(--primary);
+            font-size: 1.8rem;
+            background: rgba(79, 70, 229, 0.1);
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            background: var(--surface);
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot.running {
+            background-color: var(--success);
+            box-shadow: 0 0 0 4px var(--success-glow);
+            animation: pulse-green 2s infinite;
+        }
+
+        .dot.stopped {
+            background-color: var(--danger);
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
+        }
+
+        @keyframes pulse-green {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        /* ----- 卡片全局定义 ----- */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            /* 玻璃拟物风格：半透明底叠加底层高斯模糊 */
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        .card-header i {
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        /* ----- 输入表单域 ----- */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.625rem 1rem;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.875rem;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        input:focus {
+            background: var(--surface);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        input::placeholder {
+            color: #94A3B8;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: stretch;
+        }
+
+        /* ----- 极美控件体系 ----- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: #FEF2F2;
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: #FEE2E2;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+            color: white;
+            box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+        }
+
+        .btn-warning:hover {
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-color);
+            border-color: #CBD5E1;
+            color: var(--primary);
+        }
+
+        .btn-icon-only {
+            padding: 0.4rem;
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+        }
+
+        .btn-icon-only:hover {
+            background: #FEE2E2;
+            color: var(--danger);
+            cursor: pointer;
+        }
+
+        .btn-loading {
+            position: relative;
+            color: transparent !important;
+            pointer-events: none;
+        }
+
+        .btn-loading::after {
+            content: "";
+            position: absolute;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            left: calc(50% - 0.5rem);
+            top: calc(50% - 0.5rem);
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ----- 左侧链接队列 ----- */
+        .list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            max-height: 220px;
+            overflow-y: auto;
+            padding-right: 0.25rem;
+        }
+
+        /* 定制灵动滚动条 */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        .list-item:hover {
+            border-color: #93C5FD;
+            box-shadow: var(--shadow-sm);
+            transform: translateX(2px);
+        }
+
+        .list-item-text {
+            font-size: 0.8125rem;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 85%;
+            font-family: inherit;
+        }
+
+        .badge-count {
+            background: var(--bg-color);
+            color: var(--primary);
+            padding: 0.15rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 1px solid #E0E7FF;
+        }
+
+        /* ----- 左右版式对齐 ----- */
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ----- 精细化数据表单区 ----- */
+        .table-wrapper {
+            flex: 1;
+            overflow: auto;
+            max-height: calc(100vh - 180px);
+            background: var(--surface);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            text-align: left;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            background: rgba(248, 250, 252, 0.95);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 1rem 1.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+            z-index: 10;
+        }
+
+        td {
+            padding: 1rem 1.5rem;
+            font-size: 0.875rem;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--bg-color);
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: #FACC1505;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .cell-time {
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .cell-shop {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .cell-product {
+            max-width: 220px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--primary);
+        }
+
+        .cell-sku {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            color: #475569;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            max-width: 180px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cell-price {
+            font-weight: 700;
+            color: var(--danger);
+            font-size: 0.95rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5rem 2rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            color: #E2E8F0;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                padding: 1.5rem;
+            }
+
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .table-wrapper {
+                max-height: 500px;
+            }
+        }
+
+        /* ----- Tab 切换 ----- */
+        .tab-bar {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid var(--border);
+            padding: 0 1.5rem;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ----- 价格变化统计摘要 ----- */
+        .stats-bar {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-color);
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .stat-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .stat-chip .stat-val {
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .stat-chip.highlight .stat-val {
+            color: #D97706;
+        }
+
+        /* ----- SKU 卡片列表 ----- */
+        .sku-list {
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            max-height: calc(100vh - 300px);
+        }
+
+        .sku-row {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 0.8fr 0.6fr 0.8fr 40px;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            border-bottom: 1px solid var(--bg-color);
+            cursor: pointer;
+            transition: background 0.15s;
+            position: relative;
+        }
+
+        .sku-row:hover {
+            background: #F8FAFC;
+        }
+
+        .sku-row.changed {
+            background: linear-gradient(90deg, rgba(251, 191, 36, 0.08) 0%, rgba(251, 191, 36, 0.02) 100%);
+            border-left: 3px solid;
+            border-image: linear-gradient(180deg, #F59E0B, #D97706) 1;
+        }
+
+        .sku-row.changed::after {
+            content: '';
+            position: absolute;
+            top: 0.5rem;
+            right: 3rem;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #F59E0B;
+            animation: pulse-orange 2s infinite;
+        }
+
+        @keyframes pulse-orange {
+            0% {
+                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5);
+            }
+
+            70% {
+                box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+            }
+        }
+
+        .sku-product {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.8125rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sku-spec {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            color: #475569;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .sku-price {
+            font-weight: 700;
+            font-size: 0.9375rem;
+            color: var(--text-main);
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .sku-diff {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .sku-diff.up {
+            color: var(--danger);
+        }
+
+        .sku-diff.down {
+            color: #10B981;
+        }
+
+        .sku-diff.flat {
+            color: #94A3B8;
+        }
+
+        .sku-chevron {
+            text-align: center;
+            color: #CBD5E1;
+            transition: transform 0.2s;
+            font-size: 1rem;
+        }
+
+        .sku-row.expanded .sku-chevron {
+            transform: rotate(180deg);
+        }
+
+        /* ----- 展开时间线 ----- */
+        .timeline-panel {
+            display: none;
+            padding: 0.75rem 1.5rem 1rem 2.5rem;
+            background: #F8FAFC;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .timeline-panel.open {
+            display: block;
+        }
+
+        .tl-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.4rem 0;
+            font-size: 0.8125rem;
+            position: relative;
+        }
+
+        .tl-row::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #CBD5E1;
+            flex-shrink: 0;
+        }
+
+        .tl-row.tl-up::before {
+            background: var(--danger);
+        }
+
+        .tl-row.tl-down::before {
+            background: #10B981;
+        }
+
+        .tl-row:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 3.5px;
+            top: 1.4rem;
+            width: 1px;
+            height: calc(100% + 0.1rem);
+            background: #E2E8F0;
+        }
+
+        .tl-time {
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            min-width: 130px;
+        }
+
+        .tl-price {
+            font-weight: 600;
+            color: var(--text-main);
+            min-width: 70px;
+            text-align: right;
+        }
+
+        .tl-diff {
+            font-weight: 600;
+            font-size: 0.75rem;
+            min-width: 80px;
+        }
+
+        .tl-diff.up {
+            color: var(--danger);
+        }
+
+        .tl-diff.down {
+            color: #10B981;
+        }
+
+        .tl-diff.flat {
+            color: #94A3B8;
+        }
+
+        /* ----- SKU 表头 ----- */
+        .sku-list-header {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 0.8fr 0.6fr 0.8fr 40px;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(248, 250, 252, 0.95);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(8px);
+        }
+
+        /* ----- 运行状态 Toast 面板 ----- */
+        .toast-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .toast-overlay.visible {
+            display: flex;
+        }
+
+        .toast-panel {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border);
+            width: min(520px, 90vw);
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: toast-in 0.3s ease-out;
+        }
+
+        @keyframes toast-in {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .toast-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .toast-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toast-header .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0.25rem;
+            border-radius: 4px;
+        }
+
+        .toast-header .close-btn:hover {
+            background: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        .toast-body {
+            padding: 1.25rem 1.5rem;
+        }
+
+        .toast-stats {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .toast-stat {
+            text-align: center;
+        }
+
+        .toast-stat .val {
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .toast-stat .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 0.25rem;
+        }
+
+        .toast-section {
+            margin-bottom: 1rem;
+        }
+
+        .toast-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .toast-change-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.4rem 0.6rem;
+            font-size: 0.8125rem;
+            border-radius: 4px;
+            background: var(--bg-color);
+            margin-bottom: 0.3rem;
+        }
+
+        .toast-change-item .sku-name {
+            font-weight: 500;
+            color: var(--text-main);
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .toast-change-item .price-info {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .toast-log-list {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'SF Mono', monospace;
+            max-height: 120px;
+            overflow-y: auto;
+            background: #F8FAFC;
+            border-radius: 6px;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+        }
+
+        .toast-log-list div {
+            padding: 0.15rem 0;
+        }
+
+        .toast-notify {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .toast-notify.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .toast-notify.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #B45309;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .toast-notify.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #DC2626;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* ----- 接口检测探针弹窗 Modal ----- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(6px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.visible {
+            display: flex;
+        }
+
+        .modal-panel {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border);
+            width: min(850px, 95vw);
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            animation: toast-in 0.3s ease-out;
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .modal-body {
+            padding: 0;
+            overflow-y: auto;
+            flex: 1;
+            background: #F8FAFC;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            background: white;
+            border-bottom-left-radius: var(--radius-lg);
+            border-bottom-right-radius: var(--radius-lg);
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 40px 1fr 1fr 1.5fr 80px;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.8125rem;
+            background: white;
+        }
+
+        .field-row:hover {
+            background: #FACC1508;
+        }
+
+        .field-row.header {
+            background: #F1F5F9;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .field-val {
+            font-family: 'SF Mono', monospace;
+            color: var(--primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .field-input {
+            width: 100%;
+            padding: 0.4rem 0.6rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header-area">
+            <div class="logo">
+                <i class="ri-radar-fill"></i>
+                DataRadar 竞品控制中枢
+                <a href="/browser" target="_blank" class="advanced-link" title="进入纯净物理防拦截环境配置页">
+                    <i class="ri-robot-2-line" style="font-size: 1rem; padding: 0; background: none;"></i>
+                    数字人引擎 (Playwright)
+                </a>
+            </div>
+            <div class="status-badge" id="engine-statusWrapper">
+                <div class="dot" id="engine-dot"></div>
+                <span id="engine-statusText">检测中...</span>
+            </div>
+        </div>
+
+        <!-- 左侧控制面板 -->
+        <div class="left-panel">
+
+            <!-- 引擎核心配置卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="ri-coreos-line"></i> 调度引擎核心
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>后台轮询追潮间隔 (小时)</label>
+                        <div class="input-row">
+                            <input type="number" id="interval-input" min="1" max="72" value="1"
+                                style="width: 80px; text-align: center; font-weight:600;">
+                            <button class="btn btn-primary" onclick="saveInterval()" style="flex: 1;">
+                                <i class="ri-save-3-line"></i> 保存预设
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="input-row" style="margin-top: 0.5rem;">
+                        <button id="btn-start" class="btn btn-success" style="flex:1;" onclick="toggleEngine('start')">
+                            <i class="ri-play-circle-fill" style="margin-right:2px;"></i> 挂机启动
+                        </button>
+                        <button id="btn-stop" class="btn btn-danger" style="flex:1; display:none;"
+                            onclick="toggleEngine('stop')">
+                            <i class="ri-stop-circle-line" style="margin-right:2px;"></i> 中止轮询
+                        </button>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 0.75rem;">
+                        <label>试跑SKU限制 (0=模拟测试不耗API, 空=全量)</label>
+                        <div class="input-row">
+                            <input type="number" id="sku-limit" min="0" placeholder="空=全量"
+                                style="width:80px; text-align:center; font-weight:600;">
+                            <button id="btn-manual" class="btn btn-warning" style="flex:1;" onclick="triggerManual()">
+                                <i class="ri-flashlight-fill" style="margin-right:2px;"></i> 极速试跑
+                            </button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-outline" onclick="testNotify()"
+                        style="width:100%; margin-top:0.5rem; font-size:0.8125rem;">
+                        <i class="ri-wechat-line" style="margin-right:2px;"></i> 测试微信通知
+                    </button>
+                </div>
+            </div>
+
+            <!-- 目标链接池集合 -->
+            <div class="card" style="flex: 1;">
+                <div class="card-header" style="justify-content: space-between;">
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <i class="ri-links-fill"></i> 监听目标容器池
+                    </div>
+                    <span class="badge-count" id="url-count">0 ITEMS</span>
+                </div>
+                <div class="card-body" style="padding-top: 1rem;">
+                    <div class="input-row" style="margin-bottom: 0.8rem;">
+                        <input type="text" id="new-url" placeholder="支持淘口令或带ID分享链...">
+                        <button class="btn btn-outline" onclick="addUrl()"
+                            style="white-space: nowrap; background: #F8FAFC; color:#0F172A; border-color:#E2E8F0;">
+                            <i class="ri-add-line"></i> 添加
+                        </button>
+                    </div>
+                    <div class="list-container" id="url-list-container">
+                        <!-- 动态载入列表 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Oauth底层平台授权 -->
+            <div class="card">
+                <div class="card-header" style="border-bottom:none; padding-bottom:0.5rem; cursor:pointer;"
+                    onclick="toggleAuthPanel()">
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <i class="ri-fingerprint-line"></i> 授权底层密钥 (折叠)
+                    </div>
+                    <i class="ri-arrow-down-s-line" id="auth-chevron"></i>
+                </div>
+                <div class="card-body" id="auth-panel" style="padding-top:0; display:none;">
+                    <div class="form-group">
+                        <label>万邦数据 API KEY</label>
+                        <input type="password" id="api-key" placeholder="••••••••" onfocus="this.type='text'"
+                            onblur="this.type='password'">
+                    </div>
+                    <div class="form-group">
+                        <label>万邦数据 API SECRET</label>
+                        <input type="password" id="api-secret" placeholder="••••••••" onfocus="this.type='text'"
+                            onblur="this.type='password'">
+                    </div>
+                    <div class="form-group">
+                        <label>PushPlus 推送加 TOKEN</label>
+                        <input type="password" id="push-token" placeholder="••••••••" onfocus="this.type='text'"
+                            onblur="this.type='password'">
+                    </div>
+                    <div class="form-group"
+                        style="background:rgba(79, 70, 229, 0.05); padding: 0.5rem; border-radius: var(--radius-sm); border: 1px dashed var(--primary);">
+                        <label style="color:var(--primary);">RapidAPI Taobao Key</label>
+                        <input type="password" id="rapidapi-key" placeholder="从 RapidAPI 获取的 Key"
+                            onfocus="this.type='text'" onblur="this.type='password'">
+                        <div style="font-size:10px; margin-top:0.2rem;">
+                            <a href="https://rapidapi.com/gabrielius.u/api/taobao-advanced/" target="_blank"
+                                style="color:var(--primary); text-decoration:none;">点此获取 Key →</a>
+                        </div>
+                    </div>
+                    <div class="form-group"
+                        style="background:rgba(16, 185, 129, 0.05); padding: 0.5rem; border-radius: var(--radius-sm); border: 1px dashed var(--success); margin-top:0.5rem;">
+                        <label style="color:var(--success);">Apify API Token</label>
+                        <input type="password" id="apify-token" placeholder="从 Apify Console 获取的 Token"
+                            onfocus="this.type='text'" onblur="this.type='password'">
+                        <div style="font-size:10px; margin-top:0.2rem;">
+                            <a href="https://console.apify.com/settings/integrations" target="_blank"
+                                style="color:var(--success); text-decoration:none;">点此获取 Apify Token →</a>
+                        </div>
+                    </div>
+                    <div class="form-group"
+                        style="background:rgba(245, 158, 11, 0.05); padding: 0.5rem; border-radius: var(--radius-sm); border: 1px dashed var(--warning); margin-top:0.5rem; display:none;">
+                        <label style="color:var(--warning);">TMAPI.TOP API Token (已弃用)</label>
+                        <input type="password" id="tmapi-token" placeholder="已切换至 Apify">
+                    </div>
+                    <div class="form-group"
+                        style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed var(--border);">
+                        <label>淘宝客 APP KEY</label>
+                        <input type="password" id="tbk-app-key" placeholder="可选 (官方API使用)" onfocus="this.type='text'"
+                            onblur="this.type='password'">
+                    </div>
+                    <div class="form-group">
+                        <label>淘宝客 APP SECRET</label>
+                        <input type="password" id="tbk-app-secret" placeholder="可选 (官方API使用)" onfocus="this.type='text'"
+                            onblur="this.type='password'">
+                    </div>
+                    <div class="form-group" style="margin-top: 0.5rem;">
+                        <label>数据抓取模式</label>
+                        <select id="api-mode"
+                            style="width: 100%; padding: 0.625rem 1rem; background: var(--bg-color); border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.875rem; color: var(--text-main); outline: none;">
+                            <option value="onebound">Onebound API (中频 - 万邦)</option>
+                            <option value="rapidapi">RapidAPI API (推荐 - ¥228)</option>
+                            <option value="apify">Apify Scraper (高级 - 推荐 ¥173)</option>
+                            <option value="vlm">VLM 视觉工作流 (手机 scrcpy - 仿生)</option>
+                            <option value="tmapi" disabled>TMAPI.TOP (充值受限 - 暂不可用)</option>
+                            <option value="browser">数字人探针 (浏览器 - 风险模式)</option>
+                            <option value="fallback">混合模式 (优先淘客)</option>
+                            <option value="tbk">仅淘宝客 API (推广品)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="vlm-settings"
+                        style="display:none; padding: 0.75rem; background: rgba(79, 70, 229, 0.05); border-radius: 8px; border: 1px solid rgba(79, 70, 229, 0.1);">
+                        <label style="color:var(--primary);">VLM 随机扫描件数</label>
+                        <input type="number" id="vlm-scan-count" value="5" min="1" max="20"
+                            title="在收藏夹中随机挑选多少个商品进行多品采集">
+                        <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.25rem;">设置为 VLM
+                            模式时，将从收藏夹中随机挑选 N 个商品进行循环抓取。</p>
+                    </div>
+                    <button class="btn btn-outline" onclick="saveKeys()"
+                        style="width: 100%; margin-top: 0.9rem; font-size:0.75rem;">
+                        <i class="ri-key-2-line"></i> 更新底层鉴权环境
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 右侧历史资产库视图 -->
+        <div class="right-panel">
+            <div class="card" style="height: 100%;">
+                <div class="card-header" style="justify-content: space-between;">
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <i class="ri-line-chart-fill"></i> 数据资产中心
+                    </div>
+                    <button class="btn btn-outline" onclick="refreshCurrentTab()"
+                        style="padding: 0.35rem 0.8rem; font-size: 0.8125rem;">
+                        <i class="ri-loop-right-line"></i> 同步刷新
+                    </button>
+                </div>
+
+                <!-- Tab 导航栏 -->
+                <div class="tab-bar">
+                    <button class="tab-btn active" data-tab="price-changes" onclick="switchTab('price-changes')">
+                        <i class="ri-exchange-dollar-line"></i> 价格变化追踪
+                    </button>
+                    <button class="tab-btn" data-tab="full-history" onclick="switchTab('full-history')">
+                        <i class="ri-archive-drawer-line"></i> 全量记录归档
+                    </button>
+                </div>
+
+                <!-- Tab 1: 价格变化追踪 -->
+                <div class="tab-content active" id="tab-price-changes">
+                    <div class="stats-bar" id="change-stats">
+                        <div class="stat-chip">
+                            <i class="ri-box-3-line" style="color:var(--primary);"></i>
+                            SKU 总数: <span class="stat-val" id="stat-total">0</span>
+                        </div>
+                        <div class="stat-chip highlight">
+                            <i class="ri-alarm-warning-line" style="color:#D97706;"></i>
+                            最新变价: <span class="stat-val" id="stat-changed">0</span>
+                        </div>
+                        <div class="stat-chip">
+                            <i class="ri-time-line" style="color:#94A3B8;"></i>
+                            最后抓取: <span class="stat-val" id="stat-time">-</span>
+                        </div>
+                    </div>
+                    <div class="sku-list-header">
+                        <span>商品名称</span>
+                        <span>规格(SKU)</span>
+                        <span style="text-align:right;">到手价(￥)</span>
+                        <span style="text-align:center;">库存</span>
+                        <span style="text-align:right;">最新变化</span>
+                        <span></span>
+                    </div>
+                    <div class="sku-list" id="sku-list-container">
+                        <div class="empty-state">
+                            <i class="ri-exchange-dollar-line"></i>
+                            <p>加载中...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: 全量记录归档 -->
+                <div class="tab-content" id="tab-full-history">
+                    <div class="table-wrapper">
+                        <table id="history-table">
+                            <thead id="history-thead">
+                                <tr>
+                                    <!-- 表头将由 JS 动态生成 -->
+                                    <th>入库时间刻</th>
+                                    <th>店栈归母</th>
+                                    <th>监测简述</th>
+                                    <th>细分特征型号(SKU)</th>
+                                    <th style="text-align: right;">原价(￥)</th>
+                                    <th style="text-align: right;">当前价格(￥)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-tbody">
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="empty-state">
+                                            <i class="ri-archive-draw-line"></i>
+                                            <p>本地基底库初始化中...<br><small>系统第一次向万邦发起拉取并持久化记录后，数据将映射于此</small></p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 运行状态 Toast -->
+    <div class="toast-overlay" id="toast-overlay" onclick="closeToast(event)">
+        <div class="toast-panel" onclick="event.stopPropagation()">
+            <div class="toast-header">
+                <h3 id="toast-title"><i class="ri-checkbox-circle-fill" style="color:var(--success);"></i> 执行完成</h3>
+                <button class="close-btn" onclick="closeToast()"><i class="ri-close-line"></i></button>
+            </div>
+            <div class="toast-body" id="toast-body">
+            </div>
+        </div>
+    </div>
+
+    <!-- 探针配置 Modal -->
+    <div class="modal-overlay" id="probe-modal" onclick="closeProbeModal(event)">
+        <div class="modal-panel" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3><i class="ri-test-tube-line" style="color:var(--primary); margin-right:6px;"></i> <span
+                        id="probe-title">接口字段探测映射</span></h3>
+                <button class="close-btn" onclick="closeProbeModal()"
+                    style="background:none; border:none; color:var(--text-muted); font-size:1.2rem; cursor:pointer;"><i
+                        class="ri-close-line"></i></button>
+            </div>
+            <div class="modal-body" id="probe-body">
+                <div class="empty-state" id="probe-loading">
+                    <i class="ri-loader-4-line" style="animation:spin 1s linear infinite;color:var(--primary);"></i>
+                    <p>正在拉取实时接口数据结构...</p>
+                </div>
+                <div id="probe-content" style="display:none;">
+                    <div class="field-row header">
+                        <div>追踪</div>
+                        <div>数据节点 (Key)</div>
+                        <div>提取快照 (Value)</div>
+                        <div>挂载为明细列存储为</div>
+                        <div style="text-align:center;">设为主价格</div>
+                    </div>
+                    <div id="probe-fields-container"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeProbeModal()">取消</button>
+                <button class="btn btn-primary" id="btn-save-probe" onclick="saveProbeMapping()">
+                    <i class="ri-save-3-line"></i> 保存追踪范式
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showLoading(btnElement) {
+            btnElement.classList.add('btn-loading');
+            return () => { btnElement.classList.remove('btn-loading'); };
+        }
+
+        let priceChangePage = 1;
+        let priceChangeLoading = false;
+        let priceChangeHasMore = true;
+
+        function toggleAuthPanel() {
+            const p = document.getElementById('auth-panel');
+            const c = document.getElementById('auth-chevron');
+            if (p.style.display === 'none') {
+                p.style.display = 'flex';
+                c.style.transform = 'rotate(-180deg)';
+            } else {
+                p.style.display = 'none';
+                c.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadConfig();
+            loadPriceChanges(true);
+        });
+
+        let currentTab = 'price-changes';
+        let historyLoaded = false;
+
+        function switchTab(tabName) {
+            currentTab = tabName;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tabName);
+            });
+            document.getElementById('tab-price-changes').classList.toggle('active', tabName === 'price-changes');
+            document.getElementById('tab-full-history').classList.toggle('active', tabName === 'full-history');
+            // 延迟加载全量记录（仅首次切换时加载）
+            if (tabName === 'full-history' && !historyLoaded) {
+                loadHistory(true);
+                historyLoaded = true;
+            }
+        }
+
+        function refreshCurrentTab() {
+            if (currentTab === 'price-changes') {
+                loadPriceChanges();
+            } else {
+                loadHistory();
+            }
+        }
+
+        function loadConfig() {
+            fetch('/api/config')
+                .then(res => res.json())
+                .then(data => {
+                    const dot = document.getElementById('engine-dot');
+                    const text = document.getElementById('engine-statusText');
+
+                    if (data.is_running) {
+                        dot.className = 'dot running';
+                        text.innerText = '追踪引擎挂载中';
+                        text.style.color = 'var(--success)';
+                        document.getElementById('btn-start').style.display = 'none';
+                        document.getElementById('btn-stop').style.display = 'inline-flex';
+                    } else {
+                        dot.className = 'dot stopped';
+                        text.innerText = '挂起休眠状态';
+                        text.style.color = 'var(--danger)';
+                        document.getElementById('btn-start').style.display = 'inline-flex';
+                        document.getElementById('btn-stop').style.display = 'none';
+                    }
+
+                    document.getElementById('interval-input').value = data.interval_hours || 1;
+                    document.getElementById('api-key').value = data.api_key || '';
+                    document.getElementById('api-secret').value = data.api_secret || '';
+                    document.getElementById('push-token').value = data.pushplus_token || '';
+                    document.getElementById('rapidapi-key').value = data.rapidapi_key || '';
+                    document.getElementById('tmapi-token').value = data.tmapi_token || '';
+                    document.getElementById('apify-token').value = data.apify_token || '';
+                    document.getElementById('tbk-app-key').value = data.tbk_app_key || '';
+                    document.getElementById('tbk-app-secret').value = data.tbk_app_secret || '';
+                    document.getElementById('api-mode').value = data.api_mode || 'onebound';
+                    document.getElementById('vlm-scan-count').value = data.scan_item_count || 5;
+
+                    // 根据模式显示额外配置
+                    document.getElementById('vlm-settings').style.display = (data.api_mode === 'vlm') ? 'block' : 'none';
+                    document.getElementById('api-mode').onchange = function () {
+                        document.getElementById('vlm-settings').style.display = (this.value === 'vlm') ? 'block' : 'none';
+                    };
+
+                    const urls = data.urls || [];
+                    document.getElementById('url-count').innerText = urls.length + ' ITEMS';
+                    const container = document.getElementById('url-list-container');
+                    container.innerHTML = '';
+
+                    if (urls.length === 0) {
+                        container.innerHTML = '<div style="color:var(--text-muted); font-size: 0.8125rem; text-align:center; padding: 1.5rem 0;">当前暂无队列目标任务</div>';
+                    } else {
+                        let htmlBuffer = '';
+                        urls.forEach((urlObj, idx) => {
+                            try {
+                                let rawUrl = '';
+                                if (typeof urlObj === 'string') {
+                                    rawUrl = urlObj;
+                                } else if (urlObj && typeof urlObj === 'object') {
+                                    rawUrl = urlObj.url || '';
+                                }
+
+                                if (!rawUrl) return; // 容错空链接
+
+                                let shortName = String(rawUrl);
+                                if (shortName.includes('id=')) {
+                                    let matches = shortName.match(/[?&]id=(\d+)/);
+                                    if (matches) shortName = "淘宝链接 / ID: " + matches[1];
+                                } else if (shortName.includes('e.tb.cn')) {
+                                    shortName = "手机口令短链 / " + shortName.split('?')[0].split('/').pop();
+                                }
+
+                                htmlBuffer += `
+                            <div class="list-item">
+                                <div class="list-item-text" title="${rawUrl}">${shortName}</div>
+                                <div style="display:flex;gap:0.25rem;">
+                                    <button class="btn-icon-only" onclick="openProbeModal(${idx}, '${rawUrl}')" title="拉取数据探针及自定义列名">
+                                        <i class="ri-test-tube-line" style="color:var(--primary);"></i>
+                                    </button>
+                                    <button class="btn-icon-only" onclick="removeUrl(${idx})" title="释放任务">
+                                        <i class="ri-delete-bin-5-line"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                            } catch (e) {
+                                console.error("Error rendering URL index", idx, e);
+                            }
+                        });
+                        container.innerHTML = htmlBuffer;
+                    }
+                });
+        }
+
+        function loadPriceChanges(reset = false) {
+            if (reset) {
+                priceChangePage = 1;
+                priceChangeHasMore = true;
+                // 不在这里清空容器，避免闪烁，等数据回来再清空
+            }
+
+            if (priceChangeLoading || !priceChangeHasMore) return;
+            priceChangeLoading = true;
+
+            const container = document.getElementById('sku-list-container');
+            if (reset) {
+                container.innerHTML = '<div class="empty-state"><i class="ri-loader-4-line" style="animation:spin 1s linear infinite;"></i><p>正在分析价格变化...</p></div>';
+            }
+
+            fetch(`/api/price_changes?page=${priceChangePage}&limit=30`)
+                .then(res => res.json())
+                .then(data => {
+                    priceChangeLoading = false;
+                    if (data.error) {
+                        container.innerHTML = `<div class="empty-state"><i class="ri-error-warning-line"></i><p>${data.error}</p></div>`;
+                        return;
+                    }
+
+                    if (reset) container.innerHTML = '';
+
+                    const groups = data.sku_groups || [];
+                    const totalGroups = data.total || 0;
+
+                    // 仅在首屏更新统计信息
+                    if (priceChangePage === 1) {
+                        document.getElementById('stat-total').textContent = totalGroups;
+                        document.getElementById('stat-time').textContent = data.last_fetch_time || '-';
+                        // 注意：changed 统计由于分页了，我们需要后端返回总体 count，或者暂估
+                        // 这里假设后端返回了已变动的总数，如果没有则维持之前的逻辑
+                        if (data.changed_count !== undefined) {
+                            document.getElementById('stat-changed').textContent = data.changed_count;
+                        }
+                    }
+
+                    if (totalGroups === 0) {
+                        container.innerHTML = '<div class="empty-state"><i class="ri-exchange-dollar-line"></i><p>暂无价格记录，等待引擎首次抓取</p></div>';
+                        return;
+                    }
+
+                    let htmlBuffer = '';
+                    groups.forEach((g, idx) => {
+                        const tl = g.timeline || [];
+                        const lastEntry = tl.length >= 2 ? tl[tl.length - 1] : null;
+                        let diffHtml = '<span class="sku-diff flat">—</span>';
+                        if (lastEntry && lastEntry.diff !== null && lastEntry.diff !== 0) {
+                            const isUp = lastEntry.diff > 0;
+                            const arrow = isUp ? '↑' : '↓';
+                            const cls = isUp ? 'up' : 'down';
+                            diffHtml = `<span class="sku-diff ${cls}">${arrow} ${Math.abs(lastEntry.diff).toFixed(2)}</span>`;
+                        } else if (tl.length < 2) {
+                            diffHtml = '<span class="sku-diff flat" title="仅一次记录">首次</span>';
+                        }
+
+                        const rowClass = g.has_latest_change ? 'sku-row changed' : 'sku-row';
+                        const shopTag = g.shop ? `<span style="color:#94A3B8;font-size:0.7rem;font-weight:400;"> · ${g.shop}</span>` : '';
+
+                        // 库存变化标记
+                        let stockHtml = `<span style="font-size:0.8125rem;font-variant-numeric:tabular-nums;text-align:center;display:block;">${g.latest_stock || 0}</span>`;
+                        const lastTl = tl.length >= 2 ? tl[tl.length - 1] : null;
+                        if (lastTl && lastTl.stock_diff !== null && lastTl.stock_diff !== 0) {
+                            const sDir = lastTl.stock_diff > 0 ? '+' : '';
+                            const sClr = lastTl.stock_diff > 0 ? '#10B981' : 'var(--danger)';
+                            stockHtml += `<span style="font-size:0.65rem;font-weight:600;color:${sClr};text-align:center;display:block;">${sDir}${lastTl.stock_diff}</span>`;
+                        }
+
+                        // SKU 行
+                        let rowHtml = `<div class="${rowClass}" onclick="toggleTimeline(${idx})" id="sku-row-${idx}">`;
+                        rowHtml += `<div class="sku-product" title="${g.product}">${g.product}${shopTag}</div>`;
+                        rowHtml += `<div><span class="sku-spec" title="${g.sku}">${g.sku}</span></div>`;
+                        rowHtml += `<div class="sku-price">¥${g.latest_price.toFixed(2)}</div>`;
+                        rowHtml += `<div>${stockHtml}</div>`;
+                        rowHtml += `<div>${diffHtml}</div>`;
+                        rowHtml += `<div class="sku-chevron"><i class="ri-arrow-down-s-line"></i></div>`;
+                        rowHtml += `</div>`;
+
+                        // 时间线面板
+                        rowHtml += `<div class="timeline-panel" id="timeline-${idx}">`;
+                        tl.forEach((entry, ti) => {
+                            let tlClass = 'tl-row';
+                            let diffText = '';
+                            if (entry.diff === null) {
+                                diffText = '<span class="tl-diff flat">基准价</span>';
+                            } else if (entry.diff === 0) {
+                                diffText = '<span class="tl-diff flat">— 无变化</span>';
+                            } else if (entry.diff > 0) {
+                                tlClass += ' tl-up';
+                                diffText = `<span class="tl-diff up">↑ +${entry.diff.toFixed(2)}</span>`;
+                            } else {
+                                tlClass += ' tl-down';
+                                diffText = `<span class="tl-diff down">↓ ${entry.diff.toFixed(2)}</span>`;
+                            }
+                            // 库存变化文本
+                            let stockInfo = `<span style="color:#94A3B8;font-size:0.75rem;min-width:60px;">库存: ${entry.stock || 0}</span>`;
+                            if (entry.stock_diff !== null && entry.stock_diff !== 0) {
+                                const sDir = entry.stock_diff > 0 ? '+' : '';
+                                const sClr = entry.stock_diff > 0 ? '#10B981' : 'var(--danger)';
+                                stockInfo += `<span style="color:${sClr};font-size:0.7rem;font-weight:600;min-width:50px;">(${sDir}${entry.stock_diff})</span>`;
+                            }
+                            rowHtml += `<div class="${tlClass}">`;
+                            rowHtml += `<span class="tl-time">${entry.time}</span>`;
+                            rowHtml += `<span class="tl-price">¥${entry.price.toFixed(2)}</span>`;
+                            rowHtml += diffText;
+                            rowHtml += stockInfo;
+                            rowHtml += `</div>`;
+                        });
+                        rowHtml += `</div>`;
+                        container.insertAdjacentHTML('beforeend', rowHtml);
+                    });
+
+                    priceChangePage++;
+                    priceChangeHasMore = data.has_more;
+                })
+                .catch(err => {
+                    priceChangeLoading = false;
+                    container.innerHTML = `<div class="empty-state"><i class="ri-error-warning-line"></i><p>数据加载失败</p></div>`;
+                });
+        }
+
+        function toggleTimeline(idx) {
+            const row = document.getElementById('sku-row-' + idx);
+            const panel = document.getElementById('timeline-' + idx);
+            if (panel.classList.contains('open')) {
+                panel.classList.remove('open');
+                row.classList.remove('expanded');
+            } else {
+                panel.classList.add('open');
+                row.classList.add('expanded');
+            }
+        }
+
+        function refreshCurrentTab() {
+            if (currentTab === 'price-changes') {
+                loadPriceChanges(true);
+            } else {
+                loadHistory(true);
+            }
+        }
+
+        let historyPage = 1;
+        let historyLoading = false;
+        let historyHasMore = true;
+
+        function loadHistory(reset = false) {
+            if (reset) {
+                historyPage = 1;
+                historyHasMore = true;
+                document.getElementById('history-tbody').innerHTML = '';
+            }
+
+            if (historyLoading || !historyHasMore) return;
+            historyLoading = true;
+
+            const tbody = document.getElementById('history-tbody');
+            if (reset) {
+                tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state"><i class="ri-loader-4-line" style="animation:spin 1s linear infinite;"></i><p>加载中...</p></div></td></tr>';
+            }
+
+            fetch(`/api/history?page=${historyPage}&limit=30`)
+                .then(res => res.json())
+                .then(data => {
+                    historyLoading = false;
+                    if (reset) tbody.innerHTML = '';
+
+                    const theadRow = document.querySelector('#history-thead tr');
+                    if (data.error) {
+                        tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><i class="ri-error-warning-line"></i><p>${data.error}</p></div></td></tr>`;
+                        return;
+                    }
+                    if (!data.records || data.records.length === 0) {
+                        if (reset) {
+                            tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><i class="ri-archive-draw-line"></i><p>本地数据池空白，等待引擎抓取写入记录</p></div></td></tr>`;
+                        }
+                        historyHasMore = false;
+                        return;
+                    }
+
+                    // 动态表头生成 (仅第一页执行)
+                    if (historyPage === 1) {
+                        const firstRow = data.records[0];
+                        const fixedCols = ['获取时间', '店铺名称', '商品名称', '商品规格'];
+                        const dynamicCols = Object.keys(firstRow).filter(k => !fixedCols.includes(k) && k !== '指纹' && k !== 'Unnamed: 0');
+                        window.historyDynamicCols = dynamicCols; // 存入全局方便追加
+
+                        let theadHtml = `
+                            <th>入库时间刻</th>
+                            <th>店栈归母</th>
+                            <th>监测简述</th>
+                            <th>细分特征型号(SKU)</th>
+                        `;
+                        dynamicCols.forEach(col => {
+                            theadHtml += `<th style="text-align:right;">${col}</th>`;
+                        });
+                        theadRow.innerHTML = theadHtml;
+                    }
+
+                    const dynamicCols = window.historyDynamicCols || [];
+
+                    data.records.forEach(row => {
+                        let itemName = row['商品名称'] || '';
+                        let trHtml = `
+                    <tr>
+                        <td class="cell-time">${row['获取时间'] || '-'}</td>
+                        <td class="cell-shop">
+                            <i class="ri-store-2-fill" style="margin-right: 4px; color:#94A3B8;"></i>
+                            ${row['店铺名称'] || '-'}
+                        </td>
+                        <td class="cell-product" title="${row['商品名称']}">${itemName}</td>
+                        <td><span class="cell-sku" title="${row['商品规格']}">${row['商品规格'] || '标准主图款'}</span></td>
+                    `;
+
+                        dynamicCols.forEach(col => {
+                            let val = row[col];
+                            // 对于可能为空的值进行保护
+                            if (val === undefined || val === null || val === '') {
+                                val = '-';
+                            } else if (!isNaN(val) && val !== '-') {
+                                // 尝试格式化为小数点后两位
+                                let fVal = parseFloat(val);
+                                // 但如果原本是一个整数，就不一定要强制成 .00
+                                if (Number.isInteger(fVal)) {
+                                    val = fVal;
+                                } else {
+                                    val = fVal.toFixed(2);
+                                }
+                            }
+                            // 如果是旧表里面的原价且当前价格有值，加划线 (历史兼容性处理，若用户把原价改名为别的，就不划线了)
+                            if (col === '原价' && row['当前价格']) {
+                                let orig = parseFloat(row['原价'] || 0);
+                                let cur = parseFloat(row['当前价格'] || 0);
+                                if (orig > cur) {
+                                    val = `<span style="text-decoration:line-through;color:#94A3B8;">${val}</span>`;
+                                } else {
+                                    val = `<span style="color:#94A3B8;">${val}</span>`;
+                                }
+                            }
+                            trHtml += `<td class="cell-price" style="text-align: right;">${val}</td>`;
+                        });
+                        trHtml += `</tr>`;
+                        tbody.insertAdjacentHTML('beforeend', trHtml);
+                    });
+
+                    historyPage++;
+                    historyHasMore = data.has_more;
+                }).catch(err => {
+                    historyLoading = false;
+                    console.error("Load history error:", err);
+                });
+        }
+
+        // 监听滚动加载更多
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. 监听历史记录分页
+            const tableWrapper = document.querySelector('.table-wrapper');
+            if (tableWrapper) {
+                tableWrapper.addEventListener('scroll', () => {
+                    if (currentTab !== 'full-history') return;
+                    const { scrollTop, scrollHeight, clientHeight } = tableWrapper;
+                    if (scrollTop + clientHeight >= scrollHeight - 30) {
+                        loadHistory();
+                    }
+                });
+            }
+
+            // 2. 监听价格变化 (SKU List) 分页
+            const skuList = document.getElementById('sku-list-container');
+            if (skuList) {
+                skuList.addEventListener('scroll', () => {
+                    if (currentTab !== 'price-changes') return;
+                    const { scrollTop, scrollHeight, clientHeight } = skuList;
+                    if (scrollTop + clientHeight >= scrollHeight - 30) {
+                        loadPriceChanges();
+                    }
+                });
+            }
+        });
+
+        function saveInterval() {
+            const val = document.getElementById('interval-input').value;
+            const btn = document.querySelector('button[onclick="saveInterval()"]');
+            const stopLoading = showLoading(btn);
+            fetch('/api/config/interval', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ interval: val })
+            }).then(res => res.json()).then(data => {
+                stopLoading();
+                loadConfig();
+            });
+        }
+
+        function saveKeys() {
+            const key = document.getElementById('api-key').value;
+            const secret = document.getElementById('api-secret').value;
+            const token = document.getElementById('push-token').value;
+            const rapidapi_key = document.getElementById('rapidapi-key').value;
+            const tmapi_token = document.getElementById('tmapi-token').value;
+            const apify_token = document.getElementById('apify-token').value;
+            const tbk_key = document.getElementById('tbk-app-key').value;
+            const tbk_secret = document.getElementById('tbk-app-secret').value;
+            const api_mode = document.getElementById('api-mode').value;
+            const scan_item_count = parseInt(document.getElementById('vlm-scan-count').value) || 5;
+
+            const btn = document.querySelector('button[onclick="saveKeys()"]');
+            const stopLoading = showLoading(btn);
+
+            fetch('/api/config/keys', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key, secret, token, rapidapi_key, tmapi_token, apify_token, tbk_key, tbk_secret, api_mode, scan_item_count })
+            }).then(res => res.json()).then(data => {
+
+                stopLoading();
+                alert(data.msg);
+                loadConfig();
+            }).catch(err => {
+                stopLoading();
+                alert("保存失败");
+            });
+        }
+
+        function addUrl() {
+            const input = document.getElementById('new-url');
+            const url = input.value.trim();
+            if (!url) return;
+
+            fetch('/api/config/url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'add', url: url })
+            }).then(res => res.json()).then(data => {
+                input.value = '';
+                loadConfig();
+            });
+        }
+
+        function removeUrl(index) {
+            fetch('/api/config/url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'remove', index: index })
+            }).then(res => res.json()).then(data => {
+                loadConfig();
+            });
+        }
+
+        function toggleEngine(action) {
+            fetch('/api/engine/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: action })
+            }).then(res => res.json()).then(data => {
+                loadConfig();
+            });
+        }
+
+        function triggerManual() {
+            const btn = document.getElementById('btn-manual');
+            const stopLoading = showLoading(btn);
+            const limitInput = document.getElementById('sku-limit');
+            const limitVal = limitInput.value.trim();
+            const body = limitVal !== '' ? { limit: parseInt(limitVal) } : {};
+
+            fetch('/api/engine/run_now', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) {
+                        stopLoading();
+                        showRunResult(data);
+                        return;
+                    }
+
+                    // 启动轮询检查任务状态
+                    const pollInterval = setInterval(() => {
+                        fetch('/api/engine/status')
+                            .then(res => res.json())
+                            .then(status => {
+                                if (!status.is_running) {
+                                    clearInterval(pollInterval);
+                                    stopLoading();
+
+                                    // 任务完成，显示最后一次的结果
+                                    if (status.last_result) {
+                                        showRunResult(status.last_result);
+                                    } else {
+                                        showRunResult({ success: true, logs: ["任务已完成，但未捕获到具体结果数据。"] });
+                                    }
+
+                                    // 刷新列表数据
+                                    if (limitVal === '' || parseInt(limitVal) > 0) {
+                                        loadPriceChanges();
+                                        historyLoaded = false;
+                                    }
+                                }
+                            })
+                            .catch(err => {
+                                clearInterval(pollInterval);
+                                stopLoading();
+                                console.error("轮询状态异常:", err);
+                            });
+                    }, 1000); // 每秒查询一次
+                })
+                .catch(err => {
+                    stopLoading();
+                    showRunResult({
+                        success: false,
+                        logs: ['网络连接异常，请稍后重试'],
+                        sku_count: 0,
+                        change_count: 0,
+                        notify_status: '',
+                        changes: []
+                    });
+                });
+        }
+
+        function testNotify() {
+            const btn = event.target.closest('.btn');
+            const stopLoading = showLoading(btn);
+            fetch('/api/test/notify', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    stopLoading();
+                    showRunResult({
+                        success: data.success,
+                        sku_count: 0,
+                        change_count: 1,
+                        notify_status: data.msg,
+                        changes: [{ sku: '测试规格', old: 100.00, new: 88.00, diff: -12.00 }],
+                        logs: ['微信通知测试结果: ' + data.msg]
+                    });
+                })
+                .catch(err => {
+                    stopLoading();
+                    showRunResult({
+                        success: false,
+                        sku_count: 0, change_count: 0,
+                        notify_status: '请求失败',
+                        changes: [],
+                        logs: ['微信通知测试请求失败']
+                    });
+                });
+        }
+
+        function showRunResult(data) {
+            const overlay = document.getElementById('toast-overlay');
+            const title = document.getElementById('toast-title');
+            const body = document.getElementById('toast-body');
+
+            // 标题
+            if (data.success) {
+                title.innerHTML = '<i class="ri-checkbox-circle-fill" style="color:var(--success);"></i> 执行完成';
+            } else {
+                title.innerHTML = '<i class="ri-error-warning-fill" style="color:var(--danger);"></i> 执行异常';
+            }
+
+            let html = '';
+
+            // 统计摘要
+            html += '<div class="toast-stats">';
+            html += `<div class="toast-stat"><div class="val" style="color:var(--primary);">${data.sku_count || 0}</div><div class="label">SKU 拓取</div></div>`;
+            html += `<div class="toast-stat"><div class="val" style="color:${(data.change_count || 0) > 0 ? '#D97706' : '#94A3B8'};">${data.change_count || 0}</div><div class="label">价格变动</div></div>`;
+            html += `<div class="toast-stat"><div class="val" style="color:${(data.stock_change_count || 0) > 0 ? '#6366F1' : '#94A3B8'};">${data.stock_change_count || 0}</div><div class="label">库存变动</div></div>`;
+            html += '</div>';
+
+            // 通知状态
+            if (data.notify_status) {
+                let cls = 'warning';
+                let icon = 'ri-notification-line';
+                if (data.notify_status.includes('成功')) { cls = 'success'; icon = 'ri-check-line'; }
+                else if (data.notify_status.includes('失败') || data.notify_status.includes('请求失败')) { cls = 'error'; icon = 'ri-close-circle-line'; }
+                else if (data.notify_status === '无需通知') { cls = 'success'; icon = 'ri-check-line'; }
+                html += `<div class="toast-notify ${cls}"><i class="${icon}"></i> ${data.notify_status}</div>`;
+            }
+
+            // 变价详情
+            if (data.changes && data.changes.length > 0) {
+                html += '<div class="toast-section">';
+                html += '<div class="toast-section-title">价格变动详情</div>';
+                data.changes.forEach(c => {
+                    const isUp = c.diff > 0;
+                    const color = isUp ? 'var(--danger)' : '#10B981';
+                    const arrow = isUp ? '↑' : '↓';
+                    html += `<div class="toast-change-item">`;
+                    html += `<span class="sku-name" title="${c.sku}">${c.sku}</span>`;
+                    html += `<span class="price-info"><span style="color:#94A3B8;">¥${c.old.toFixed(2)}</span> → <span style="color:${color};font-weight:700;">¥${c.new.toFixed(2)} ${arrow}${Math.abs(c.diff).toFixed(2)}</span></span>`;
+                    html += `</div>`;
+                });
+                html += '</div>';
+            }
+
+            // 执行日志
+            if (data.logs && data.logs.length > 0) {
+                html += '<div class="toast-section">';
+                html += '<div class="toast-section-title">执行日志</div>';
+                html += '<div class="toast-log-list">';
+                data.logs.forEach(log => {
+                    html += `<div>${log}</div>`;
+                });
+                html += '</div></div>';
+            }
+
+            body.innerHTML = html;
+            overlay.classList.add('visible');
+        }
+
+        function closeToast(event) {
+            if (event && event.target !== document.getElementById('toast-overlay')) return;
+            document.getElementById('toast-overlay').classList.remove('visible');
+        }
+
+        // --- 探针相关功能 ---
+        let currentProbeIdx = -1;
+        let currentProbeUrl = '';
+
+        function openProbeModal(idx, rawUrl) {
+            currentProbeIdx = idx;
+            currentProbeUrl = rawUrl;
+            const modal = document.getElementById('probe-modal');
+            const loading = document.getElementById('probe-loading');
+            const content = document.getElementById('probe-content');
+            const container = document.getElementById('probe-fields-container');
+            const saveBtn = document.getElementById('btn-save-probe');
+
+            modal.classList.add('visible');
+            loading.style.display = 'flex';
+            content.style.display = 'none';
+            container.innerHTML = '';
+            saveBtn.disabled = true;
+
+            const matches = rawUrl.match(/[?&]id=(\d+)/);
+            const itemId = matches ? matches[1] : 'Unknown';
+            document.getElementById('probe-title').innerText = `SKU 逐级探针 | 商品 ID: ${itemId}`;
+
+            fetch('/api/engine/test_url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index: idx, url: rawUrl })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    loading.style.display = 'none';
+                    if (!data.success) {
+                        container.innerHTML = `<div style="padding:2rem; text-align:center; color:var(--danger); font-weight:600;">${data.msg}</div>`;
+                        content.style.display = 'block';
+                        return;
+                    }
+
+                    content.style.display = 'block';
+                    saveBtn.disabled = false;
+
+                    const mapping = data.fields_config || {};
+                    const skus = data.skus || [];
+
+                    if (skus.length === 0) {
+                        container.innerHTML = '<div style="padding:2rem; text-align:center; color:var(--text-muted);">未探测到任何 SKU 数据</div>';
+                        return;
+                    }
+
+                    let html = '';
+                    skus.forEach((sku, sIdx) => {
+                        const skuName = sku.properties_name || `规格 #${sIdx + 1}`;
+                        const rawData = sku.raw_data || {};
+
+                        html += `
+                        <div class="sku-probe-group" style="border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.75rem; overflow: hidden;">
+                            <div class="sku-probe-header" onclick="var d=this.nextElementSibling; var isOpen=d.style.display==='block'; d.style.display=isOpen?'none':'block'; this.querySelector('.ri-arrow-down-s-line').style.transform=isOpen?'rotate(0deg)':'rotate(-180deg)';" 
+                                 style="background: var(--bg-color); padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-bottom: 1px solid var(--border);">
+                                <div style="font-weight: 700; color: var(--text-main); display:flex; align-items:center; gap:0.5rem;">
+                                    <i class="ri-shopping-bag-3-line" style="color:var(--primary);"></i>
+                                    ${skuName}
+                                </div>
+                                <div style="display:flex; align-items:center; gap:1rem; font-size: 0.8125rem; color: var(--text-muted);">
+                                    <span>包含 ${Object.keys(rawData).length} 个属性字段</span>
+                                    <i class="ri-arrow-down-s-line" style="transition: transform 0.2s;"></i>
+                                </div>
+                            </div>
+                            <div class="sku-probe-details" style="display:none; padding: 0.5rem; background: white;">
+                                <div class="field-row header" style="background: rgba(var(--primary-rgb), 0.03); font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">
+                                    <div style="width:30px;">追</div>
+                                    <div style="flex:2;">数据键名 (API Key)</div>
+                                    <div style="flex:2;">即时观测值</div>
+                                    <div style="flex:2;">保存列名</div>
+                                    <div style="width:50px; text-align:center;">主价</div>
+                                </div>
+                                ${Object.entries(rawData).map(([key, val]) => {
+                            const conf = mapping[key] || {};
+                            const isTracked = conf.label ? 'checked' : '';
+                            const labelVal = conf.label || '';
+                            const isMain = conf.is_main ? 'checked' : '';
+                            let displayVal = (typeof val === 'object') ? JSON.stringify(val) : String(val);
+                            if (displayVal.length > 50) displayVal = displayVal.substring(0, 47) + '...';
+
+                            return `
+                                    <div class="field-row" style="border-bottom: 1px solid #f1f5f9; padding: 0.4rem 0;">
+                                        <div style="width:30px; display:flex; align-items:center;"><input type="checkbox" class="probe-chk-track" data-key="${key}" ${isTracked} onchange="syncProbeTracking('${key}', this.checked)"></div>
+                                        <div style="flex:2; font-family: 'SF Mono', monospace; font-size: 0.75rem; color: var(--text-main); font-weight:600;">${key}</div>
+                                        <div style="flex:2; font-size: 0.75rem; color: #64748b; overflow:hidden; text-overflow:ellipsis;" title="${String(val).replace(/"/g, '&quot;')}">${displayVal}</div>
+                                        <div style="flex:2;"><input type="text" class="field-input probe-input-label" data-key="${key}" value="${labelVal}" placeholder="中文列名" oninput="syncProbeLabel('${key}', this.value)" style="height:28px; font-size:0.75rem; padding:0 6px;"></div>
+                                        <div style="width:50px; text-align:center; display:flex; align-items:center; justify-content:center;"><input type="radio" name="main_price_radio" value="${key}" ${isMain}></div>
+                                    </div>
+                                    `;
+                        }).join('')}
+                            </div>
+                        </div>
+                    `;
+                    });
+                    container.innerHTML = html;
+
+                    // 默认展开第一个 SKU
+                    const firstDetails = container.querySelector('.sku-probe-details');
+                    if (firstDetails) {
+                        firstDetails.classList.add('open');
+                        firstDetails.style.display = 'block';
+                        container.querySelector('.ri-arrow-down-s-line').style.transform = 'rotate(-180deg)';
+                    }
+                })
+                .catch(err => {
+                    loading.style.display = 'none';
+                    container.innerHTML = `<div style="padding:2rem; text-align:center; color:var(--danger);">网络异常: ${err.message}</div>`;
+                });
+        }
+
+        // 同步所有 SKU 下相同 Key 的勾选状态
+        function syncProbeTracking(key, checked) {
+            document.querySelectorAll(`.probe-chk-track[data-key="${key}"]`).forEach(el => el.checked = checked);
+        }
+
+        // 同步所有 SKU 下相同 Key 的自定义列名
+        function syncProbeLabel(key, val) {
+            document.querySelectorAll(`.probe-input-label[data-key="${key}"]`).forEach(el => el.value = val);
+        }
+
+        function closeProbeModal(event) {
+            if (event && event.target !== document.getElementById('probe-modal')) return;
+            document.getElementById('probe-modal').classList.remove('visible');
+        }
+
+        function saveProbeMapping() {
+            // 我们只需要从第一个包含该 Key 的 inputs 集合中提取即可，因为它们是同步的
+            const mapping = {};
+            const mainRadio = document.querySelector('input[name="main_price_radio"]:checked');
+            const mainKey = mainRadio ? mainRadio.value : '';
+
+            // 抓取所有被勾选的唯一 Key
+            const trackedKeys = new Set();
+            document.querySelectorAll('.probe-chk-track:checked').forEach(el => trackedKeys.add(el.getAttribute('data-key')));
+
+            trackedKeys.forEach(key => {
+                const labelInput = document.querySelector(`.probe-input-label[data-key="${key}"]`);
+                let label = labelInput ? labelInput.value.trim() : key;
+                if (!label) label = key;
+
+                mapping[key] = {
+                    label: label,
+                    is_main: (key === mainKey)
+                };
+            });
+
+            if (Object.keys(mapping).length === 0) {
+                alert("请至少勾选一个想要追踪的字段。");
+                return;
+            }
+
+            const btn = document.getElementById('btn-save-probe');
+            const stopLoading = showLoading(btn);
+
+            fetch('/api/config/mapping', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index: currentProbeIdx, mapping: mapping })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    stopLoading();
+                    closeProbeModal();
+                    loadConfig();
+                })
+                .catch(err => {
+                    stopLoading();
+                    alert("保存失败: " + err.message);
+                });
+        }
+    </script>
+</body>
+
+</html>
