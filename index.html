@@ -1213,7 +1213,13 @@
         </div>
 
         <div class="section">
-          <h4>游玩内容介绍与照片</h4>
+          <div class="price-toolbar">
+            <h4 style="margin: 0;">游玩内容介绍与照片</h4>
+            <div class="price-toolbar-actions">
+              <button id="exportSpotOverridesBtn" class="price-refresh" type="button">导出永久图片配置</button>
+            </div>
+          </div>
+          <div id="spotOverrideStatus" class="footnote" style="margin-top: 6px;">图片配置来源：页面内置。若手动改图后需永久保存，请点“导出永久图片配置”并提交到仓库。</div>
           <div id="highlights" class="highlights"></div>
         </div>
 
@@ -2104,6 +2110,8 @@
     const toggleDebugViewerBtn = document.getElementById("toggleDebugViewerBtn");
     const workflowStepsBody = document.getElementById("workflowStepsBody");
     const workflowEditorStatus = document.getElementById("workflowEditorStatus");
+    const exportSpotOverridesBtn = document.getElementById("exportSpotOverridesBtn");
+    const spotOverrideStatus = document.getElementById("spotOverrideStatus");
     const coordPickerModal = document.getElementById("coordPickerModal");
     const coordPickerImage = document.getElementById("coordPickerImage");
     const coordPickerRect = document.getElementById("coordPickerRect");
@@ -2148,6 +2156,7 @@
     const HOTEL_STATE_STORAGE_KEY = "trip_hotel_state_v1";
     const SPOT_COVER_STORAGE_KEY = "trip_spot_cover_v1";
     const SPOT_GALLERY_STORAGE_KEY = "trip_spot_gallery_v1";
+    const SPOT_OVERRIDE_FILE = "trip-spot-overrides.json";
     const HISTORY_CATEGORY_KEY = "trip_history_category_v1";
     const ROUTE_API = "https://router.project-osrm.org/route/v1/driving/";
     const GEOCODE_API = "https://nominatim.openstreetmap.org/search";
@@ -4699,12 +4708,14 @@
           if (!normalized) return;
           spotCoverOverrideState[idx] = normalized;
         });
+        setSpotOverrideStatus("图片配置来源：浏览器本地缓存（仅本机可见，非永久）。");
       } catch (_) {}
     }
 
     function saveSpotCoverOverrides() {
       try {
         localStorage.setItem(SPOT_COVER_STORAGE_KEY, JSON.stringify(spotCoverOverrideState));
+        setSpotOverrideStatus("图片配置已改动：当前仅在本机缓存。请点击“导出永久图片配置”并提交到仓库。");
       } catch (_) {}
     }
 
@@ -4720,13 +4731,90 @@
           const urls = v.map((x) => normalizeHttpUrl(x)).filter(Boolean).slice(0, 20);
           if (urls.length) spotGalleryOverrideState[idx] = urls;
         });
+        setSpotOverrideStatus("图片配置来源：浏览器本地缓存（仅本机可见，非永久）。");
       } catch (_) {}
     }
 
     function saveSpotGalleryOverrides() {
       try {
         localStorage.setItem(SPOT_GALLERY_STORAGE_KEY, JSON.stringify(spotGalleryOverrideState));
+        setSpotOverrideStatus("图片配置已改动：当前仅在本机缓存。请点击“导出永久图片配置”并提交到仓库。");
       } catch (_) {}
+    }
+
+    function setSpotOverrideStatus(text) {
+      if (!spotOverrideStatus) return;
+      spotOverrideStatus.textContent = String(text || "").trim();
+    }
+
+    function collectSpotOverridesPayload() {
+      const cover = {};
+      const gallery = {};
+      FEATURED_SCENIC_SPOTS.forEach((spot, idx) => {
+        const coverUrl = normalizeHttpUrl(spotCoverOverrideState[idx] || spot.cover || "");
+        if (coverUrl) cover[String(idx)] = coverUrl;
+        const gallerySeed = Array.isArray(spotGalleryOverrideState[idx]) && spotGalleryOverrideState[idx].length
+          ? spotGalleryOverrideState[idx]
+          : (Array.isArray(spot.gallery) ? spot.gallery : []);
+        const urls = gallerySeed.map((u) => normalizeHttpUrl(u)).filter(Boolean).slice(0, 20);
+        if (urls.length) gallery[String(idx)] = urls;
+      });
+      return { cover, gallery, updatedAt: Date.now() };
+    }
+
+    function applySpotOverridePayload(payload, options = {}) {
+      const overwrite = !!options.overwrite;
+      if (!payload || typeof payload !== "object") return;
+      const nextCover = payload.cover && typeof payload.cover === "object" ? payload.cover : {};
+      const nextGallery = payload.gallery && typeof payload.gallery === "object" ? payload.gallery : {};
+      Object.entries(nextCover).forEach(([k, v]) => {
+        const idx = Number(k);
+        if (!Number.isFinite(idx)) return;
+        if (!overwrite && spotCoverOverrideState[idx]) return;
+        const normalized = normalizeHttpUrl(v);
+        if (normalized) spotCoverOverrideState[idx] = normalized;
+      });
+      Object.entries(nextGallery).forEach(([k, v]) => {
+        const idx = Number(k);
+        if (!Number.isFinite(idx) || !Array.isArray(v)) return;
+        if (!overwrite && Array.isArray(spotGalleryOverrideState[idx]) && spotGalleryOverrideState[idx].length) return;
+        const urls = v.map((x) => normalizeHttpUrl(x)).filter(Boolean).slice(0, 20);
+        if (urls.length) spotGalleryOverrideState[idx] = urls;
+      });
+    }
+
+    async function loadSpotOverridesFromFile() {
+      try {
+        const res = await fetch(`${SPOT_OVERRIDE_FILE}?t=${Date.now()}`, { cache: "no-store", headers: { Accept: "application/json" } });
+        if (!res.ok) return;
+        const payload = await res.json();
+        applySpotOverridePayload(payload, { overwrite: false });
+        setSpotOverrideStatus("图片配置来源：仓库文件 + 本地覆盖（仓库文件可永久保存）。");
+      } catch (_) {}
+    }
+
+    async function exportSpotOverrides() {
+      const payload = collectSpotOverridesPayload();
+      const pretty = JSON.stringify(payload, null, 2);
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(pretty);
+        copied = true;
+      } catch (_) {}
+      try {
+        const blob = new Blob([pretty], { type: "application/json;charset=utf-8" });
+        const href = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = href;
+        a.download = SPOT_OVERRIDE_FILE;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(href);
+      } catch (_) {}
+      setSpotOverrideStatus(copied
+        ? "已导出永久图片配置：JSON 已复制到剪贴板，并下载为 trip-spot-overrides.json。提交该文件即可永久生效。"
+        : "已导出永久图片配置：已下载 trip-spot-overrides.json。请提交该文件到仓库。");
     }
 
     function applySpotGalleryAddUrl(inputEl) {
@@ -5853,6 +5941,12 @@
       }
     });
 
+    if (exportSpotOverridesBtn) {
+      exportSpotOverridesBtn.addEventListener("click", async () => {
+        await exportSpotOverrides();
+      });
+    }
+
     document.addEventListener("click", (ev) => {
       if (Date.now() < spotGalleryDragMovedUntil) {
         ev.preventDefault();
@@ -6383,6 +6477,7 @@
     restorePriceShots();
     restoreHistoryCache();
     loadWorkflows().finally(async () => {
+      await loadSpotOverridesFromFile();
       await preloadAllPlanHistory();
       await render();
       await Promise.all([
