@@ -4,10 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>双人旅行可视化规划 | 2026-03-26 至 2026-03-29</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Barlow:wght@600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
   <style>
     :root {
       --bg: #f4f6f8;
@@ -28,7 +25,7 @@
 
     body {
       margin: 0;
-      font-family: "Noto Sans SC", sans-serif;
+      font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Segoe UI", sans-serif;
       color: var(--ink);
       background: var(--bg);
     }
@@ -59,7 +56,7 @@
 
     .hero h1 {
       margin: 0 0 8px;
-      font-family: "Barlow", sans-serif;
+      font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
       letter-spacing: 0.5px;
       font-size: clamp(1.5rem, 2.2vw, 2.2rem);
       color: #ffffff;
@@ -460,6 +457,15 @@
       padding: 10px;
       background: #fbfdff;
     }
+    .route-main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, 1fr);
+      gap: 10px;
+      align-items: start;
+    }
+    .route-main-left {
+      min-width: 0;
+    }
     .route-toolbar {
       display: flex;
       gap: 8px;
@@ -483,6 +489,11 @@
       border-radius: 10px;
       padding: 6px;
     }
+    .route-row.playlist-open {
+      border-color: #9ac1e2;
+      box-shadow: 0 0 0 1px rgba(49, 114, 177, 0.18);
+      background: #f7fbff;
+    }
     .route-row input {
       width: 100%;
       border: 1px solid #cdd9e6;
@@ -497,6 +508,20 @@
       padding: 6px 8px;
       font-size: 0.86rem;
       background: #fff;
+    }
+    .route-row-actions {
+      display: grid;
+      gap: 6px;
+      align-self: stretch;
+      align-content: center;
+    }
+    .route-row-actions .mini-btn {
+      width: 100%;
+    }
+    .route-playlist-btn.active {
+      border-color: #0a5f78;
+      background: #0a5f78;
+      color: #fff;
     }
     .route-seg {
       grid-column: 1 / -1;
@@ -513,6 +538,75 @@
     .route-stat {
       margin-top: 6px;
       font-size: 0.84rem;
+      color: #4a657f;
+    }
+    .play-list-panel {
+      border: 1px solid #dbe7f2;
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+      min-height: 132px;
+    }
+    .play-list-panel[hidden] {
+      display: none !important;
+    }
+    .play-list-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .play-list-head b {
+      font-size: 0.92rem;
+      color: #14324b;
+    }
+    .play-list-items {
+      display: grid;
+      gap: 8px;
+      max-height: 360px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+    .play-list-empty {
+      border: 1px dashed #c9dced;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 0.84rem;
+      color: #4a657f;
+      background: #f8fbff;
+    }
+    .play-item-row {
+      border: 1px solid #e1eaf3;
+      border-radius: 10px;
+      padding: 8px;
+      background: #fbfdff;
+      display: grid;
+      gap: 6px;
+    }
+    .play-item-top {
+      display: grid;
+      grid-template-columns: 1fr 120px;
+      gap: 6px;
+    }
+    .play-item-input,
+    .play-item-select {
+      width: 100%;
+      border: 1px solid #cdd9e6;
+      border-radius: 8px;
+      padding: 6px 8px;
+      font-size: 0.84rem;
+      background: #fff;
+      color: #1a3d5e;
+    }
+    .play-item-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .play-item-meta {
+      font-size: 0.78rem;
       color: #4a657f;
     }
 
@@ -915,6 +1009,139 @@
       padding: 6px 8px;
       font-size: 0.86rem;
     }
+    .geocode-pick-list {
+      display: grid;
+      gap: 8px;
+      max-height: 62vh;
+      overflow: auto;
+    }
+    .geocode-pick-item {
+      width: 100%;
+      text-align: left;
+      border: 1px solid #355b85;
+      border-radius: 10px;
+      background: #112844;
+      color: #e7f0ff;
+      padding: 8px 10px;
+      display: grid;
+      gap: 4px;
+      cursor: pointer;
+    }
+    .geocode-pick-item:hover {
+      border-color: #5fa4ff;
+      background: #153257;
+    }
+    .geocode-pick-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #f2f6ff;
+    }
+    .geocode-pick-meta {
+      font-size: 0.8rem;
+      color: #b6c9e2;
+      line-height: 1.35;
+    }
+    .play-place-picker-grid {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 10px;
+      min-height: 520px;
+      max-height: 66vh;
+    }
+    .play-place-left {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 8px;
+      min-height: 0;
+    }
+    .play-place-search-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+    .play-place-search-row input[type="text"] {
+      width: 100%;
+      background: #112844;
+      color: #f0f5ff;
+      border: 1px solid #2c517d;
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-size: 0.9rem;
+    }
+    .play-place-search-row .mini-btn {
+      min-width: 64px;
+      height: 34px;
+      padding: 0 10px;
+      white-space: nowrap;
+    }
+    .play-place-result-list {
+      border: 1px solid #2d5079;
+      border-radius: 10px;
+      background: #0d223b;
+      padding: 6px;
+      overflow: auto;
+      min-height: 220px;
+    }
+    .play-place-result-empty {
+      color: #9eb4cf;
+      font-size: 0.84rem;
+      padding: 10px;
+      line-height: 1.4;
+    }
+    .play-place-result-item {
+      width: 100%;
+      text-align: left;
+      border: 1px solid #355b85;
+      border-radius: 9px;
+      background: #123357;
+      color: #e7f0ff;
+      padding: 8px 9px;
+      display: grid;
+      gap: 4px;
+      cursor: pointer;
+      margin-bottom: 6px;
+    }
+    .play-place-result-item:last-child {
+      margin-bottom: 0;
+    }
+    .play-place-result-item:hover {
+      border-color: #6bb2ff;
+      background: #18426e;
+    }
+    .play-place-result-item.active {
+      border-color: #7cc0ff;
+      background: #1c4e86;
+      box-shadow: 0 0 0 1px rgba(124, 192, 255, 0.32);
+    }
+    .play-place-result-title {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: #f2f7ff;
+    }
+    .play-place-result-meta {
+      font-size: 0.78rem;
+      color: #c2d4ea;
+      line-height: 1.35;
+    }
+    .play-place-map-wrap {
+      border: 1px solid #2d5079;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #0b1f36;
+      min-height: 280px;
+    }
+    #playPlacePickerMap {
+      width: 100%;
+      height: 100%;
+      min-height: 280px;
+    }
+    .play-place-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
     .step-table {
       width: 100%;
       border-collapse: collapse;
@@ -1167,6 +1394,11 @@
     @media (max-width: 980px) {
       .layout { grid-template-columns: 1fr; }
       #map { height: 360px; }
+      .route-main { grid-template-columns: 1fr; }
+      .play-list-items { max-height: none; }
+      .play-place-picker-grid { grid-template-columns: 1fr; min-height: 0; max-height: none; }
+      .play-place-map-wrap { min-height: 300px; }
+      #playPlacePickerMap { min-height: 300px; height: 300px; }
     }
   </style>
 </head>
@@ -1279,10 +1511,24 @@
                 <button type="button" class="mini-btn" data-action="add-route-point-map">地图点选</button>
               </div>
             </div>
-            <div id="routeList" class="route-list"></div>
-            <div id="routeStats" class="route-stat">行程距离/时长自动计算中...</div>
+            <div class="route-main">
+              <div class="route-main-left">
+                <div id="routeList" class="route-list"></div>
+                <div id="routeStats" class="route-stat">行程距离/时长自动计算中...</div>
+              </div>
+              <aside id="playListPanel" class="play-list-panel" hidden>
+                <div class="play-list-head">
+                  <b id="playListTitle">游玩清单</b>
+                  <button id="addPlayItemBtn" type="button" class="mini-btn" disabled>添加</button>
+                </div>
+                <div id="playListItems" class="play-list-items">
+                  <div class="play-list-empty">选择左侧目的地后可编辑该地点的游玩清单。</div>
+                </div>
+                <div class="play-item-meta">输入地点名称后点击“地图定位”，会在地图中标记位置；查不到会弹出提示。</div>
+              </aside>
+            </div>
           </div>
-          <p class="footnote">地图底图来自 OpenStreetMap。已绘制推荐线路和关键停留点，支持连续缩放；右上角可放大到街道级查看细节。</p>
+          <p class="footnote">地图底图来自高德公开瓦片。已绘制推荐线路和关键停留点，支持连续缩放；右上角可放大到街道级查看细节。</p>
         </div>
       </section>
     </main>
@@ -1367,7 +1613,45 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <div id="geocodePickerModal" class="modal-mask">
+    <div class="modal" style="width:min(760px,96vw);max-height:84vh;">
+      <div class="modal-head">
+        <h3 id="geocodePickerTitle">请选择定位地点</h3>
+        <button id="closeGeocodePickerBtn" class="mini-btn" type="button">关闭</button>
+      </div>
+      <div id="geocodePickerHint" class="footnote" style="margin-bottom:8px;">检测到多个同名地点，请选择正确位置。</div>
+      <div id="geocodePickerList" class="geocode-pick-list"></div>
+    </div>
+  </div>
+
+  <div id="playPlacePickerModal" class="modal-mask">
+    <div class="modal" style="width:min(980px,96vw);max-height:88vh;">
+      <div class="modal-head">
+        <h3 id="playPlacePickerTitle">添加游玩地点</h3>
+        <button id="closePlayPlacePickerBtn" class="mini-btn" type="button">关闭</button>
+      </div>
+      <div class="play-place-picker-grid">
+        <div class="play-place-left">
+          <div class="play-place-search-row">
+            <input id="playPlaceSearchInput" type="text" placeholder="输入地点关键词（例如：人民广场）">
+            <button id="playPlaceSearchBtn" class="mini-btn" type="button">搜索</button>
+          </div>
+          <div id="playPlaceSearchHint" class="footnote">输入地点后点击“搜索”，从列表选择一个位置，右侧会显示地图坐标。</div>
+          <div id="playPlaceResultList" class="play-place-result-list">
+            <div class="play-place-result-empty">请先输入地点关键词。</div>
+          </div>
+          <div class="play-place-actions">
+            <button id="confirmPlayPlaceBtn" class="mini-btn" type="button" disabled>确认添加</button>
+          </div>
+        </div>
+        <div class="play-place-map-wrap">
+          <div id="playPlacePickerMap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./vendor/leaflet/leaflet.js"></script>
   <script>
     const plans = [
       {
@@ -1984,6 +2268,15 @@
         ]
       }
     ];
+    // User preference: always show previous scheme 2 first.
+    const preferFirstId = "nanning-chongzuo-baise-liuzhou-yangshuo-guilin";
+    const fallbackFirstId = "guilin-yangshuo";
+    const preferIdx = plans.findIndex((p) => p.id === preferFirstId);
+    const fallbackIdx = plans.findIndex((p) => p.id === fallbackFirstId);
+    if (preferIdx >= 0 && fallbackIdx >= 0 && preferIdx > fallbackIdx) {
+      const [preferPlan] = plans.splice(preferIdx, 1);
+      plans.splice(fallbackIdx, 0, preferPlan);
+    }
     plans.forEach((p, i) => {
       p.planNo = i + 1;
     });
@@ -2097,6 +2390,10 @@
       const historyList = document.getElementById("historyList");
       const routeList = document.getElementById("routeList");
       const routeStats = document.getElementById("routeStats");
+      const playListPanel = document.getElementById("playListPanel");
+      const playListTitle = document.getElementById("playListTitle");
+      const addPlayItemBtn = document.getElementById("addPlayItemBtn");
+      const playListItems = document.getElementById("playListItems");
     const vlmEditorModal = document.getElementById("vlmEditorModal");
     const closeVlmEditorBtn = document.getElementById("closeVlmEditorBtn");
     const workflowSelect = document.getElementById("workflowSelect");
@@ -2128,6 +2425,20 @@
     const closePriceShotBtn = document.getElementById("closePriceShotBtn");
     const priceShotImage = document.getElementById("priceShotImage");
     const priceShotTitle = document.getElementById("priceShotTitle");
+    const geocodePickerModal = document.getElementById("geocodePickerModal");
+    const geocodePickerTitle = document.getElementById("geocodePickerTitle");
+    const geocodePickerHint = document.getElementById("geocodePickerHint");
+    const geocodePickerList = document.getElementById("geocodePickerList");
+    const closeGeocodePickerBtn = document.getElementById("closeGeocodePickerBtn");
+    const playPlacePickerModal = document.getElementById("playPlacePickerModal");
+    const playPlacePickerTitle = document.getElementById("playPlacePickerTitle");
+    const closePlayPlacePickerBtn = document.getElementById("closePlayPlacePickerBtn");
+    const playPlaceSearchInput = document.getElementById("playPlaceSearchInput");
+    const playPlaceSearchBtn = document.getElementById("playPlaceSearchBtn");
+    const playPlaceSearchHint = document.getElementById("playPlaceSearchHint");
+    const playPlaceResultList = document.getElementById("playPlaceResultList");
+    const playPlacePickerMapEl = document.getElementById("playPlacePickerMap");
+    const confirmPlayPlaceBtn = document.getElementById("confirmPlayPlaceBtn");
 
     const SEARCH = {
       depDate: "2026-03-26",
@@ -2140,7 +2451,7 @@
     const LOCAL_PRICE_AGENT = "http://127.0.0.1:7788";
     const LOCAL_SERVICE_HUB = "http://127.0.0.1:7799";
 
-    let currentId = "guilin-yangshuo";
+    let currentId = "nanning-chongzuo-baise-liuzhou-yangshuo-guilin";
     let priceRefreshToken = 0;
     const planPriceState = {};
     const planTempState = {};
@@ -2158,15 +2469,17 @@
     const SPOT_GALLERY_STORAGE_KEY = "trip_spot_gallery_v1";
     const SPOT_OVERRIDE_FILE = "trip-spot-overrides.json";
     const HISTORY_CATEGORY_KEY = "trip_history_category_v1";
-    const ROUTE_API = "https://router.project-osrm.org/route/v1/driving/";
-    const GEOCODE_API = "https://nominatim.openstreetmap.org/search";
     const routeCache = new Map();
     const geocodeCache = new Map();
+    const geocodeListCache = new Map();
+    let geocodeClientRateLimitedUntil = 0;
     const spotCoverOverrideState = {};
     const spotGalleryOverrideState = {};
     let routePickMode = false;
     let routeCalcToken = 0;
     let geocodeToken = 0;
+    const PLAY_ITEM_TYPES = ["餐饮", "酒店", "景点", "机场", "火车站"];
+    let openPlayListState = { planId: "", routeIdx: -1 };
     const TRAVEL_MODES = [
       { id: "flight", label: "飞机", speed: 600, fixedMin: 120 },
       { id: "drive", label: "自驾", speed: 70 },
@@ -2177,7 +2490,7 @@
       { id: "ferry", label: "渡轮", speed: 25 },
       { id: "raft", label: "竹筏", speed: 6 }
     ];
-    let map, markerLayer, routeLayer;
+    let map, markerLayer, routeLayer, playListLayer, playPlacePickerMap, playPlacePickerMarker;
     let workflows = [];
     let currentWorkflowId = "";
     let dragStepFrom = null;
@@ -2193,6 +2506,17 @@
     const historyFlightFilterByPlan = {};
     const historyFlightTripByPlan = {};
     const priceShotByPlanPlatform = {};
+    const geocodePickerState = { resolve: null, open: false, candidates: [] };
+    const playPlacePickerState = {
+      open: false,
+      planId: "",
+      routeIdx: -1,
+      routeName: "",
+      query: "",
+      results: [],
+      selectedIdx: -1,
+      token: 0
+    };
     const PRICE_SHOT_STORAGE_KEY = "trip_price_shots_v1";
     const PRICE_HISTORY_STORAGE_KEY = "trip_price_history_cache_v2";
     const PICKER_STATE = {
@@ -3532,8 +3856,9 @@
     }
 
     function getFlightGroupKey(record) {
-      const depTime = String(record?.depTime || "").trim();
-      const arrTime = String(record?.arrTime || "").trim();
+      const times = getRecordFlightTimes(record);
+      const depTime = String(times.depTime || "").trim();
+      const arrTime = String(times.arrTime || "").trim();
       if (depTime || arrTime) return `time::${depTime || "--:--"}→${arrTime || "--:--"}`;
       return "time::未配置时间";
     }
@@ -3579,15 +3904,58 @@
       return Object.values(historyRecordsByPlan).flat().filter(Boolean);
     }
 
+    function buildLegacyHistoryRecordId(r) {
+      const category = String(r?.category || "flight").trim();
+      const platform = String(r?.platformCode || r?.platform || r?.platformLabel || "").trim();
+      const amount = String(Number(r?.amount || 0));
+      const createdAt = String(Number(r?.createdAt || r?.updatedAt || 0));
+      const recTimes = getRecordFlightTimes(r);
+      const depTime = String(recTimes.depTime || "").trim();
+      const arrTime = String(recTimes.arrTime || "").trim();
+      const flightNo = String(r?.flightNo || "").trim();
+      const checkinDate = String(r?.checkinDate || "").trim();
+      const hotelName = String(r?.hotelName || "").trim();
+      return `legacy:${category}|${platform}|${amount}|${createdAt}|${depTime}|${arrTime}|${flightNo}|${checkinDate}|${hotelName}`;
+    }
+
+    function matchHistoryRecordId(record, targetId) {
+      const target = String(targetId || "").trim();
+      if (!target) return false;
+      const id = String(record?.id || "").trim();
+      if (id && id === target) return true;
+      return buildLegacyHistoryRecordId(record) === target;
+    }
+
+    function removeHistoryEntryLocal(recordId) {
+      let removed = 0;
+      if (Array.isArray(historyRecordsGlobal)) {
+        const prev = historyRecordsGlobal.length;
+        historyRecordsGlobal = historyRecordsGlobal.filter((r) => !matchHistoryRecordId(r, recordId));
+        removed += Math.max(0, prev - historyRecordsGlobal.length);
+      }
+      Object.keys(historyRecordsByPlan).forEach((k) => {
+        const list = Array.isArray(historyRecordsByPlan[k]) ? historyRecordsByPlan[k] : [];
+        const next = list.filter((r) => !matchHistoryRecordId(r, recordId));
+        if (next.length !== list.length) {
+          removed += list.length - next.length;
+          historyRecordsByPlan[k] = next;
+        }
+      });
+      if (removed > 0) persistHistoryCache();
+      return removed;
+    }
+
     function renderHistoryRows(planId, rows, category) {
       return rows.slice(0, 24).map((r) => {
         const tripLabel = category === "flight" ? getFlightTripBucketLabel(getFlightTripBucket(r)) : "";
+        const recTimes = getRecordFlightTimes(r);
         const flightMeta = category === "flight"
-          ? [tripLabel, String(r?.flightNo || "").trim(), (String(r?.depTime || "").trim() || String(r?.arrTime || "").trim()) ? `${r.depTime || "--:--"}→${r.arrTime || "--:--"}` : ""].filter(Boolean).join(" · ")
+          ? [tripLabel, String(r?.flightNo || "").trim(), (recTimes.depTime || recTimes.arrTime) ? `${recTimes.depTime || "--:--"}→${recTimes.arrTime || "--:--"}` : ""].filter(Boolean).join(" · ")
           : `${r.checkinDate || ""} ${r.hotelName || ""}`.trim();
         const dateMeta = category === "flight"
           ? `${r.depDate || ""}${r.retDate ? ` - ${r.retDate}` : ""}`
           : "";
+        const recordId = String(r.id || "").trim() || buildLegacyHistoryRecordId(r);
         return `
           <div class="history-row">
             <div class="history-row-main">
@@ -3595,7 +3963,7 @@
               <span class="history-row-time">${formatHistoryTime(r.createdAt)}</span>
               <span class="history-row-time">${esc([dateMeta, flightMeta].filter(Boolean).join(" · "))}</span>
             </div>
-            <button type="button" class="history-del-btn" data-action="delete-history" data-plan-id="${esc(planId)}" data-record-id="${esc(r.id || "")}" title="删除记录">×</button>
+            <button type="button" class="history-del-btn" data-action="delete-history" data-plan-id="${esc(planId)}" data-record-id="${esc(recordId)}" title="删除记录">×</button>
           </div>
         `;
       }).join("");
@@ -3707,9 +4075,9 @@
           const gMax = gValues.length ? Math.max(...gValues) : null;
           flightFilterHtml = `
             <div class="history-tabs" style="margin-top:8px; align-items:center;">
-              <span class="history-row-time">时刻筛选</span>
+              <span class="history-row-time">时刻筛选（仅当前平台 + 当前去/返/往）</span>
               <select data-action="switch-history-flight-group" data-plan-id="${esc(planId)}" style="border:1px solid #c7d9ec;border-radius:8px;padding:4px 8px;background:#fff;color:#2d4f71;">
-                ${flightGroups.map((g) => `<option value="${esc(g.value)}" ${g.value === selectedFlightGroup ? "selected" : ""}>${esc(getFlightGroupLabel(g.gKey))}</option>`).join("")}
+                ${flightGroups.map((g) => `<option value="${esc(g.value)}" ${g.value === selectedFlightGroup ? "selected" : ""}>${esc(getFlightGroupLabel(g.gKey))}（${g.rows.length}条）</option>`).join("")}
               </select>
             </div>
           `;
@@ -3937,6 +4305,9 @@
       delete planFlightRouteState[planId];
       delete planFlightTripState[planId];
       delete planPriceState[planId];
+      if (openPlayListState.planId === planId) {
+        openPlayListState = { planId: "", routeIdx: -1 };
+      }
       Object.keys(priceShotByPlanPlatform).forEach((k) => {
         if (k.startsWith(`${planId}__`)) delete priceShotByPlanPlatform[k];
       });
@@ -4024,10 +4395,18 @@
       if (flightCompareFromInput) flightCompareFromInput.value = routeCfg.fromCity || "";
       if (flightCompareToInput) flightCompareToInput.value = routeCfg.toCity || "";
       const compareTimeCfg = getFlightCompareTimeConfig(plan, tripType);
-      if (flightCompareDepInput) flightCompareDepInput.value = compareTimeCfg.depTime || "";
-      if (flightCompareArrInput) flightCompareArrInput.value = compareTimeCfg.arrTime || "";
+      const hasManualTimeState = hasAnyFlightCompareTimeState(plan, tripType);
+      const inferredTimeCfg = hasManualTimeState
+        ? { depTime: "", arrTime: "" }
+        : inferFlightCompareTimeConfigFromHistory(plan, tripType, routeCfg, records);
+      const activeTimeCfg = (compareTimeCfg.depTime || compareTimeCfg.arrTime) ? compareTimeCfg : { depTime: "", arrTime: "" };
+      const displayTimeCfg = (activeTimeCfg.depTime || activeTimeCfg.arrTime) ? activeTimeCfg : inferredTimeCfg;
+      const effectiveTimeCfg = (displayTimeCfg.depTime || displayTimeCfg.arrTime) ? displayTimeCfg : { depTime: "", arrTime: "" };
+      const hasCompareTimeFilter = !!(String(effectiveTimeCfg.depTime || "").trim() || String(effectiveTimeCfg.arrTime || "").trim());
+      if (flightCompareDepInput) flightCompareDepInput.value = displayTimeCfg.depTime || "";
+      if (flightCompareArrInput) flightCompareArrInput.value = displayTimeCfg.arrTime || "";
       const shotKey = (row) => {
-        const refKey = `${row.tripType}_${row.direction}_${compareTimeCfg.depTime || ""}_${compareTimeCfg.arrTime || ""}`;
+        const refKey = `${row.tripType}_${row.direction}_${effectiveTimeCfg.depTime || ""}_${effectiveTimeCfg.arrTime || ""}`;
         return buildShotKey(plan.id, "flight", row.platform, refKey);
       };
       const renderValueCell = (row, valueText) => {
@@ -4036,9 +4415,36 @@
         if (!has) return esc(valueText);
         return `<a href="#" class="buy-link" data-action="view-shot" data-shot-key="${esc(key)}">${esc(valueText)}</a>`;
       };
+      const FLIGHT_BATCH_WINDOW_MS = 10 * 60 * 1000;
+      const pickCheapestRecord = (list) => {
+        if (!Array.isArray(list) || !list.length) return null;
+        const latestTs = list.reduce((max, r) => {
+          const ts = Number(r?.createdAt || r?.updatedAt || 0) || 0;
+          return ts > max ? ts : max;
+        }, 0);
+        const scoped = latestTs > 0
+          ? list.filter((r) => {
+            const ts = Number(r?.createdAt || r?.updatedAt || 0) || 0;
+            return (latestTs - ts) <= FLIGHT_BATCH_WINDOW_MS;
+          })
+          : list;
+        const pool = scoped.length ? scoped : list;
+        const sorted = pool.slice().sort((a, b) => {
+          const aAmountRaw = Number(a?.amount);
+          const bAmountRaw = Number(b?.amount);
+          const aAmount = Number.isFinite(aAmountRaw) && aAmountRaw > 0 ? aAmountRaw : Number.POSITIVE_INFINITY;
+          const bAmount = Number.isFinite(bAmountRaw) && bAmountRaw > 0 ? bAmountRaw : Number.POSITIVE_INFINITY;
+          if (aAmount !== bAmount) return aAmount - bAmount;
+          const aTs = Number(a?.createdAt || a?.updatedAt || 0) || 0;
+          const bTs = Number(b?.createdAt || b?.updatedAt || 0) || 0;
+          return bTs - aTs;
+        });
+        return sorted[0] || null;
+      };
       const findFlightRecord = (row) => {
-        const targetDep = String(compareTimeCfg.depTime || "").trim();
-        const targetArr = String(compareTimeCfg.arrTime || "").trim();
+        const targetDep = String(effectiveTimeCfg.depTime || "").trim();
+        const targetArr = String(effectiveTimeCfg.arrTime || "").trim();
+        const hasTimeFilter = !!(targetDep || targetArr);
         const filtered = records.filter((r) => {
           const category = String(r.category || "flight");
           if (category !== "flight") return false;
@@ -4049,14 +4455,15 @@
           if (tripTypeMatch !== row.tripType) return false;
           if (row.tripType === "oneway" && String(r.direction || "") !== row.direction) return false;
           if (!matchRecordRoute(r, routeCfg)) return false;
-          if (targetDep && String(r.depTime || "") !== targetDep) return false;
-          if (targetArr && String(r.arrTime || "") !== targetArr) return false;
+          const recTimes = getRecordFlightTimes(r);
+          if (targetDep && recTimes.depTime !== targetDep) return false;
+          if (targetArr && recTimes.arrTime !== targetArr) return false;
           return true;
         });
         if (filtered.length) {
-          return filtered.slice().sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))[0];
+          return pickCheapestRecord(filtered);
         }
-        // Fallback: if no tripType match but time+platform match, show latest.
+        // Fallback: if no tripType match but time+platform match, choose the cheapest.
         const relaxed = records.filter((r) => {
           const category = String(r.category || "flight");
           if (category !== "flight") return false;
@@ -4064,13 +4471,15 @@
           const platformLabel = platformCodeToDisplayLabel(platform) || String(r.platformLabel || r.platform || "");
           if (platformLabel !== row.platform) return false;
           if (!matchRecordRoute(r, routeCfg)) return false;
-          if (targetDep && String(r.depTime || "") !== targetDep) return false;
-          if (targetArr && String(r.arrTime || "") !== targetArr) return false;
+          const recTimes = getRecordFlightTimes(r);
+          if (targetDep && recTimes.depTime !== targetDep) return false;
+          if (targetArr && recTimes.arrTime !== targetArr) return false;
           return true;
         });
         if (relaxed.length) {
-          return relaxed.slice().sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))[0];
+          return pickCheapestRecord(relaxed);
         }
+        if (hasTimeFilter) return null;
         // Fallback 2: same platform + same trip/direction, ignore time filter.
         const byTripLatest = records.filter((r) => {
           const category = String(r.category || "flight");
@@ -4085,9 +4494,9 @@
           return true;
         });
         if (byTripLatest.length) {
-          return byTripLatest.slice().sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))[0];
+          return pickCheapestRecord(byTripLatest);
         }
-        // Fallback 3: same platform latest flight record.
+        // Fallback 3: same platform any matched record.
         const byPlatformLatest = records.filter((r) => {
           const category = String(r.category || "flight");
           if (category !== "flight") return false;
@@ -4097,9 +4506,10 @@
           return matchRecordRoute(r, routeCfg);
         });
         if (!byPlatformLatest.length) return null;
-        return byPlatformLatest.slice().sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))[0];
+        return pickCheapestRecord(byPlatformLatest);
       };
 
+      let matchedRecordCount = 0;
       flightPriceTable.innerHTML = `
         <thead>
           <tr>
@@ -4114,15 +4524,19 @@
         <tbody>
           ${displayPrices.map((row, idx) => {
             const record = findFlightRecord(row);
+            if (record) matchedRecordCount += 1;
             const priceText = record ? `¥${Number(record.amount || 0).toLocaleString("zh-CN")}` : "待刷新";
             const updatedAt = record ? Number(record.createdAt || record.updatedAt || 0) : 0;
             const updatedText = formatPriceUpdatedTime(updatedAt);
             const updatedTitle = updatedAt ? formatHistoryTime(updatedAt) : "";
+            const recTimes = getRecordFlightTimes(record);
+            const rowDepDisplay = displayTimeCfg.depTime || recTimes.depTime;
+            const rowArrDisplay = displayTimeCfg.arrTime || recTimes.arrTime;
             return `
               <tr data-price-idx="${idx}" data-flight="1">
                 <td>${row.label || (row.tripType === "oneway" ? "单程" : "往返")}</td>
                 <td>${row.platform}</td>
-                <td>${esc(compareTimeCfg.depTime || "--:--")} → ${esc(compareTimeCfg.arrTime || "--:--")}</td>
+                <td>${esc(rowDepDisplay || "--:--")} → ${esc(rowArrDisplay || "--:--")}</td>
                 <td id="flight-price-value-${idx}">${renderValueCell(row, priceText)} <button type="button" class="mini-btn" data-action="refresh-flight" data-price-idx="${idx}" title="刷新${esc(row.platform)}价格">↻</button></td>
                 <td title="${esc(updatedTitle)}">${esc(updatedText)}</td>
                 <td><a class="buy-link" target="_blank" rel="noreferrer" href="${resolveDeepLink(plan, row)}">查看/购买</a></td>
@@ -4131,6 +4545,9 @@
           }).join("")}
         </tbody>
       `;
+      if (hasCompareTimeFilter && matchedRecordCount === 0) {
+        setFlightStatus("价格状态：该起降时刻暂无历史价格，请点“刷新机票报价”抓取对应时刻");
+      }
     }
 
     function renderHotelPrices(plan) {
@@ -4227,11 +4644,15 @@
     }
 
     async function deleteHistoryEntry(recordId) {
-      await fetch(`${LOCAL_PRICE_AGENT}/api/price-history/delete`, {
+      const resp = await fetch(`${LOCAL_PRICE_AGENT}/api/price-history/delete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: recordId })
       });
+      if (!resp.ok) throw new Error("history_delete_failed");
+      const data = await resp.json().catch(() => ({}));
+      if (!data?.ok || Number(data?.removed || 0) <= 0) throw new Error("history_delete_miss");
+      return Number(data?.removed || 0);
     }
 
     async function checkLocalAgentHealth() {
@@ -4624,7 +5045,8 @@
       const web = String(webUrl || "").trim();
       const app = String(appUrl || "").trim();
       if (!web && !app) return;
-      if (app) {
+      const canUseHiddenFrame = app && /^(snssdk\d*:|douyin:|aweme:)/i.test(app);
+      if (canUseHiddenFrame) {
         const hiddenFrame = document.createElement("iframe");
         hiddenFrame.style.display = "none";
         hiddenFrame.src = app;
@@ -4635,7 +5057,9 @@
         }, 900);
         return;
       }
-      window.open(web, "_blank", "noopener,noreferrer");
+      if (web) {
+        window.open(web, "_blank", "noopener,noreferrer");
+      }
     }
 
     function normalizeVideoUrl(rawUrl) {
@@ -4784,6 +5208,26 @@
     }
 
     async function loadSpotOverridesFromFile() {
+      // Prefer service-hub API so file:// pages can still load persistent overrides.
+      try {
+        const hubRes = await fetch(`${LOCAL_SERVICE_HUB}/api/spot-overrides`, {
+          cache: "no-store",
+          headers: { Accept: "application/json" }
+        });
+        if (hubRes.ok) {
+          const hubPayload = await hubRes.json();
+          applySpotOverridePayload(hubPayload, { overwrite: false });
+          setSpotOverrideStatus("图片配置来源：service-hub 持久文件 + 本地覆盖。");
+          return;
+        }
+      } catch (_) {}
+
+      // file:// origin cannot fetch local files due to browser security policy.
+      if (location.protocol === "file:") {
+        setSpotOverrideStatus("当前为 file:// 打开，已跳过本地 JSON 直读；请启动 service-hub 读取持久配置。");
+        return;
+      }
+
       try {
         const res = await fetch(`${SPOT_OVERRIDE_FILE}?t=${Date.now()}`, { cache: "no-store", headers: { Accept: "application/json" } });
         if (!res.ok) return;
@@ -4795,26 +5239,22 @@
 
     async function exportSpotOverrides() {
       const payload = collectSpotOverridesPayload();
-      const pretty = JSON.stringify(payload, null, 2);
-      let copied = false;
       try {
-        await navigator.clipboard.writeText(pretty);
-        copied = true;
-      } catch (_) {}
-      try {
-        const blob = new Blob([pretty], { type: "application/json;charset=utf-8" });
-        const href = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = href;
-        a.download = SPOT_OVERRIDE_FILE;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(href);
-      } catch (_) {}
-      setSpotOverrideStatus(copied
-        ? "已导出永久图片配置：JSON 已复制到剪贴板，并下载为 trip-spot-overrides.json。提交该文件即可永久生效。"
-        : "已导出永久图片配置：已下载 trip-spot-overrides.json。请提交该文件到仓库。");
+        const res = await fetch(`${LOCAL_SERVICE_HUB}/api/spot-overrides`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            cover: payload.cover,
+            gallery: payload.gallery
+          })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const saved = await res.json();
+        if (!saved || !saved.ok) throw new Error(saved?.message || "save failed");
+        setSpotOverrideStatus("已直接覆盖 D:\\JointProjects\\Trips\\trip-spot-overrides.json（无需下载确认）。");
+      } catch (_err) {
+        setSpotOverrideStatus("保存失败：请先确保 service-hub 正在运行（http://127.0.0.1:7799）。");
+      }
     }
 
     function applySpotGalleryAddUrl(inputEl) {
@@ -4869,12 +5309,14 @@
     }
 
     async function fetchWeather(lat, lng) {
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weather_code&timezone=Asia%2FShanghai`;
       try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("weather api error");
-        const data = await res.json();
-        return data.current?.temperature_2m;
+        const url = `${LOCAL_SERVICE_HUB}/api/weather/current?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}`;
+        const res = await fetch(url, { headers: { Accept: "application/json" } });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data?.ok === false) return null;
+        const temp = Number(data?.temperature);
+        if (!Number.isFinite(temp)) return null;
+        return temp;
       } catch (_) {
         return null;
       }
@@ -4944,7 +5386,22 @@
           const parsed = JSON.parse(raw);
           if (parsed && typeof parsed === "object") {
             Object.entries(parsed).forEach(([k, v]) => {
-              if (v && typeof v === "object") planFlightTimeState[k] = v;
+              if (!v || typeof v !== "object") return;
+              const cleaned = {};
+              Object.entries(v).forEach(([rowKey, cfg]) => {
+                if (!cfg || typeof cfg !== "object") return;
+                const depTime = normalizeClockTime(cfg.depTime);
+                const arrTime = normalizeClockTime(cfg.arrTime);
+                if (!depTime && !arrTime) return;
+                cleaned[rowKey] = {
+                  ...cfg,
+                  depTime,
+                  arrTime
+                };
+              });
+              if (Object.keys(cleaned).length) {
+                planFlightTimeState[k] = cleaned;
+              }
             });
           }
         }
@@ -5032,9 +5489,32 @@
       return planFlightTimeState[planId][rowKey] || { depTime: "", arrTime: "" };
     }
 
+    function hasFlightTimeConfig(planId, rowKey) {
+      const bucket = planFlightTimeState[planId];
+      if (!bucket || typeof bucket !== "object") return false;
+      if (!Object.prototype.hasOwnProperty.call(bucket, rowKey)) return false;
+      const cfg = bucket[rowKey];
+      const depTime = normalizeClockTime(cfg?.depTime);
+      const arrTime = normalizeClockTime(cfg?.arrTime);
+      return !!(depTime || arrTime);
+    }
+
     function setFlightTimeConfig(planId, rowKey, data) {
       if (!planFlightTimeState[planId]) planFlightTimeState[planId] = {};
-      planFlightTimeState[planId][rowKey] = { ...planFlightTimeState[planId][rowKey], ...data };
+      const prev = planFlightTimeState[planId][rowKey] || {};
+      const hasDep = data && Object.prototype.hasOwnProperty.call(data, "depTime");
+      const hasArr = data && Object.prototype.hasOwnProperty.call(data, "arrTime");
+      const depTime = normalizeClockTime(hasDep ? data.depTime : prev.depTime);
+      const arrTime = normalizeClockTime(hasArr ? data.arrTime : prev.arrTime);
+      if (!depTime && !arrTime) {
+        delete planFlightTimeState[planId][rowKey];
+        if (!Object.keys(planFlightTimeState[planId]).length) {
+          delete planFlightTimeState[planId];
+        }
+        saveFlightUiState();
+        return;
+      }
+      planFlightTimeState[planId][rowKey] = { ...prev, ...data, depTime, arrTime };
       saveFlightUiState();
     }
 
@@ -5046,16 +5526,80 @@
       const rows = getPlanFlightPrices(plan, tripType).filter((r) => r && r.type === "机票");
       for (const row of rows) {
         const cfg = getFlightTimeConfig(plan.id, getFlightRowStateKey(plan, row));
-        const depTime = String(cfg.depTime || "").trim();
-        const arrTime = String(cfg.arrTime || "").trim();
+        const depTime = normalizeClockTime(cfg.depTime);
+        const arrTime = normalizeClockTime(cfg.arrTime);
         if (depTime || arrTime) return { depTime, arrTime };
       }
       return { depTime: "", arrTime: "" };
     }
 
+    function hasAnyFlightCompareTimeState(plan, tripType) {
+      const rows = getPlanFlightPrices(plan, tripType).filter((r) => r && r.type === "机票");
+      return rows.some((row) => hasFlightTimeConfig(plan.id, getFlightRowStateKey(plan, row)));
+    }
+
+    function inferFlightCompareTimeConfigFromHistory(plan, tripType, routeCfg, records) {
+      const rows = getPlanFlightPrices(plan, tripType).filter((r) => r && r.type === "机票");
+      if (!rows.length) return { depTime: "", arrTime: "" };
+      const rowTripType = String(rows[0].tripType || "round");
+      const directionSet = new Set(rows.map((r) => String(r.direction || "round")));
+      const pickBest = (list) => {
+        const bestBySlot = new Map();
+        list.forEach((r) => {
+          if (String(r?.category || "flight") !== "flight") return;
+          if (!matchRecordRoute(r, routeCfg)) return;
+          const recTripType = String(r?.tripType || "round");
+          const recDirection = String(r?.direction || "round");
+          if (rowTripType === "round") {
+            if (recTripType !== "round") return;
+          } else {
+            if (recTripType !== "oneway") return;
+            if (!directionSet.has(recDirection)) return;
+          }
+          const recTimes = getRecordFlightTimes(r);
+          const depTime = normalizeClockTime(recTimes.depTime);
+          const arrTime = normalizeClockTime(recTimes.arrTime);
+          if (!depTime && !arrTime) return;
+          const slot = `${depTime || "--:--"}→${arrTime || "--:--"}`;
+          const prev = bestBySlot.get(slot) || {
+            depTime,
+            arrTime,
+            count: 0,
+            latestTs: 0
+          };
+          const ts = Number(r?.createdAt || r?.updatedAt || 0) || 0;
+          prev.count += 1;
+          if (ts > prev.latestTs) prev.latestTs = ts;
+          bestBySlot.set(slot, prev);
+        });
+        if (!bestBySlot.size) return null;
+        const sorted = Array.from(bestBySlot.values()).sort((a, b) => {
+          if (b.count !== a.count) return b.count - a.count;
+          return b.latestTs - a.latestTs;
+        });
+        return sorted[0] || null;
+      };
+
+      const samePlan = records.filter((r) => String(r?.planId || "") === String(plan?.id || ""));
+      const bestInPlan = pickBest(samePlan);
+      if (bestInPlan) {
+        return {
+          depTime: normalizeClockTime(bestInPlan.depTime),
+          arrTime: normalizeClockTime(bestInPlan.arrTime)
+        };
+      }
+
+      const bestGlobal = pickBest(records);
+      if (!bestGlobal) return { depTime: "", arrTime: "" };
+      return {
+        depTime: normalizeClockTime(bestGlobal.depTime),
+        arrTime: normalizeClockTime(bestGlobal.arrTime)
+      };
+    }
+
     function setFlightCompareTimeConfig(plan, tripType, data) {
-      const depTime = String(data?.depTime || "").trim();
-      const arrTime = String(data?.arrTime || "").trim();
+      const depTime = normalizeClockTime(data?.depTime);
+      const arrTime = normalizeClockTime(data?.arrTime);
       const rows = getPlanFlightPrices(plan, tripType).filter((r) => r && r.type === "机票");
       rows.forEach((row) => {
         const rowKey = getFlightRowStateKey(plan, row);
@@ -5128,6 +5672,195 @@
         saveRouteOverrides();
       }
 
+      function createPlayListItem(initial = {}) {
+        return {
+          id: `play_${Date.now()}_${Math.floor(Math.random() * 100000)}`,
+          name: String(initial.name || "").trim(),
+          type: normalizePlayItemType(initial.type),
+          lat: parsePlayCoord(initial.lat),
+          lng: parsePlayCoord(initial.lng)
+        };
+      }
+
+      function normalizePlayItemType(rawType) {
+        const type = String(rawType || "").trim();
+        if (!type) return "景点";
+        return PLAY_ITEM_TYPES.includes(type) ? type : "景点";
+      }
+
+      function parsePlayCoord(rawValue) {
+        if (rawValue === null || rawValue === undefined) return null;
+        const text = typeof rawValue === "string" ? rawValue.trim() : rawValue;
+        if (text === "") return null;
+        const num = Number(text);
+        return Number.isFinite(num) ? num : null;
+      }
+
+      function hasPlayCoords(item) {
+        const lat = parsePlayCoord(item?.lat);
+        const lng = parsePlayCoord(item?.lng);
+        return lat !== null && lng !== null;
+      }
+
+      function buildGeocodeCandidates(placeName, routeName) {
+        const base = String(placeName || "").trim();
+        const route = String(routeName || "").trim();
+        const list = [];
+        const push = (raw) => {
+          const text = String(raw || "").replace(/\s+/g, " ").trim();
+          if (!text || list.includes(text)) return;
+          list.push(text);
+        };
+        const stripTerminal = (raw) => String(raw || "")
+          .replace(/第?\s*\d+\s*航站楼/gi, "")
+          .replace(/航站楼\s*\d+/gi, "")
+          .replace(/T\s*\d+/gi, "")
+          .replace(/Terminal\s*\d+/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        push(`${base} ${route}`);
+        push(base);
+
+        const stripped = stripTerminal(base);
+        if (stripped && stripped !== base) {
+          push(`${stripped} ${route}`);
+          push(stripped);
+        }
+
+        if (stripped.includes("首都机场")) {
+          const alt = stripped.replace(/首都机场/g, "首都国际机场");
+          push(`${alt} ${route}`);
+          push(alt);
+        }
+        if (stripped.includes("大兴机场")) {
+          const alt = stripped.replace(/大兴机场/g, "大兴国际机场");
+          push(`${alt} ${route}`);
+          push(alt);
+        }
+        return list;
+      }
+
+      function normalizePlayListItem(raw) {
+        const item = raw && typeof raw === "object" ? raw : {};
+        let lat = parsePlayCoord(item.lat);
+        let lng = parsePlayCoord(item.lng);
+        // Backward fix: early versions mistakenly persisted null as 0,0.
+        if (lat === 0 && lng === 0) {
+          lat = null;
+          lng = null;
+        }
+        return {
+          id: String(item.id || `play_${Date.now()}_${Math.floor(Math.random() * 100000)}`),
+          name: String(item.name || "").trim(),
+          type: normalizePlayItemType(item.type),
+          lat,
+          lng
+        };
+      }
+
+      function getRoutePlayList(routePoint) {
+        if (!routePoint || typeof routePoint !== "object") return [];
+        if (!Array.isArray(routePoint.playList)) {
+          routePoint.playList = [];
+        } else {
+          routePoint.playList = routePoint.playList.map((it) => normalizePlayListItem(it));
+        }
+        return routePoint.playList;
+      }
+
+      function closeOpenPlayList() {
+        openPlayListState = { planId: "", routeIdx: -1 };
+      }
+
+      function toggleOpenPlayList(planId, routeIdx) {
+        if (openPlayListState.planId === planId && Number(openPlayListState.routeIdx) === Number(routeIdx)) {
+          closeOpenPlayList();
+          return;
+        }
+        openPlayListState = { planId, routeIdx: Number(routeIdx) };
+      }
+
+      function syncOpenPlayListAfterRouteDelete(planId, removedIdx) {
+        if (openPlayListState.planId !== planId) return;
+        const openIdx = Number(openPlayListState.routeIdx);
+        if (!Number.isFinite(openIdx)) {
+          closeOpenPlayList();
+          return;
+        }
+        if (openIdx === removedIdx) {
+          closeOpenPlayList();
+          return;
+        }
+        if (openIdx > removedIdx) {
+          openPlayListState = { planId, routeIdx: openIdx - 1 };
+        }
+      }
+
+      function getOpenPlayListContext(plan) {
+        if (!plan || openPlayListState.planId !== plan.id) return null;
+        const routeIdx = Number(openPlayListState.routeIdx);
+        if (!Number.isFinite(routeIdx) || routeIdx < 0) return null;
+        const route = getPlanRoute(plan);
+        if (routeIdx >= route.length) return null;
+        const routePoint = route[routeIdx];
+        if (!routePoint) return null;
+        return { route, routeIdx, routePoint };
+      }
+
+      function renderPlayListPanel(plan) {
+        if (!playListPanel || !playListItems || !playListTitle) return;
+        const ctx = getOpenPlayListContext(plan);
+        if (!ctx) {
+          playListPanel.hidden = true;
+          playListTitle.textContent = "游玩清单";
+          playListItems.innerHTML = '<div class="play-list-empty">选择左侧目的地后可编辑该地点的游玩清单。</div>';
+          if (addPlayItemBtn) {
+            addPlayItemBtn.disabled = true;
+            delete addPlayItemBtn.dataset.routeIdx;
+          }
+          return;
+        }
+
+        playListPanel.hidden = false;
+        const routeName = String(ctx.routePoint.name || `地点${ctx.routeIdx + 1}`);
+        playListTitle.textContent = `${routeName} · 游玩清单`;
+        if (addPlayItemBtn) {
+          addPlayItemBtn.disabled = false;
+          addPlayItemBtn.dataset.routeIdx = String(ctx.routeIdx);
+        }
+
+        const list = getRoutePlayList(ctx.routePoint);
+        if (!list.length) {
+          playListItems.innerHTML = '<div class="play-list-empty">清单为空，点击“添加”新增地点。</div>';
+          return;
+        }
+
+        playListItems.innerHTML = list.map((item, itemIdx) => {
+          const hasPos = hasPlayCoords(item);
+          const lat = parsePlayCoord(item.lat);
+          const lng = parsePlayCoord(item.lng);
+          const posText = hasPos
+            ? `已定位：${lat.toFixed(5)}, ${lng.toFixed(5)}`
+            : "未定位";
+          return `
+            <div class="play-item-row" data-play-idx="${itemIdx}" data-play-id="${esc(item.id)}">
+              <div class="play-item-top">
+                <input class="play-item-input" type="text" data-action="play-item-name" data-play-idx="${itemIdx}" data-play-id="${esc(item.id)}" placeholder="地点名称" value="${esc(item.name)}" />
+                <select class="play-item-select" data-action="play-item-type" data-play-idx="${itemIdx}" data-play-id="${esc(item.id)}">
+                  ${PLAY_ITEM_TYPES.map((type) => `<option value="${type}" ${item.type === type ? "selected" : ""}>${type}</option>`).join("")}
+                </select>
+              </div>
+              <div class="play-item-actions">
+                <button type="button" class="mini-btn" data-action="play-item-locate" data-play-idx="${itemIdx}" data-play-id="${esc(item.id)}">地图定位</button>
+                <button type="button" class="mini-btn" data-action="play-item-remove" data-play-idx="${itemIdx}" data-play-id="${esc(item.id)}">删除</button>
+              </div>
+              <div class="play-item-meta">${posText}</div>
+            </div>
+          `;
+        }).join("");
+      }
+
       function formatDistance(meters) {
         if (!Number.isFinite(meters)) return "未知";
         if (meters >= 1000) return `${(meters / 1000).toFixed(1)} km`;
@@ -5156,6 +5889,46 @@
       const h = Math.floor(mins / 60);
       const m = mins % 60;
       return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    }
+
+    function normalizeClockTime(raw) {
+      const src = String(raw || "").trim().replace(/[：]/g, ":");
+      if (!src) return "";
+      const m = src.match(/(\d{1,2})\s*:\s*(\d{1,2})/);
+      if (!m) return "";
+      const h = Number(m[1]);
+      const mm = Number(m[2]);
+      if (!Number.isFinite(h) || !Number.isFinite(mm)) return "";
+      if (h < 0 || h > 23 || mm < 0 || mm > 59) return "";
+      return `${String(h).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+    }
+
+    function getRecordFlightTimes(record) {
+      if (!record || typeof record !== "object") return { depTime: "", arrTime: "" };
+      const pickFirst = (list) => {
+        for (const item of list) {
+          const time = normalizeClockTime(item);
+          if (time) return time;
+        }
+        return "";
+      };
+      let depTime = pickFirst([record.depTime, record.departureTime, record.departTime, record.takeoffTime, record.originTime]);
+      let arrTime = pickFirst([record.arrTime, record.arrivalTime, record.arriveTime, record.landingTime, record.destTime]);
+      if (!depTime || !arrTime) {
+        const rawText = [
+          record.timeLabel,
+          record.flightTime,
+          record.timeRange,
+          record.segmentTime,
+          record.title
+        ].map((x) => String(x || "").trim()).filter(Boolean).join(" ");
+        if (rawText) {
+          const matches = rawText.match(/\d{1,2}\s*[：:]\s*\d{1,2}/g) || [];
+          if (!depTime && matches[0]) depTime = normalizeClockTime(matches[0]);
+          if (!arrTime && matches[1]) arrTime = normalizeClockTime(matches[1]);
+        }
+      }
+      return { depTime, arrTime };
     }
 
     function getModeConfig(modeId) {
@@ -5252,18 +6025,334 @@
       return mode.fixedMin ? base + mode.fixedMin : base;
     }
 
+    function closePlayPlacePicker() {
+      playPlacePickerState.open = false;
+      playPlacePickerState.planId = "";
+      playPlacePickerState.routeIdx = -1;
+      playPlacePickerState.routeName = "";
+      playPlacePickerState.query = "";
+      playPlacePickerState.results = [];
+      playPlacePickerState.selectedIdx = -1;
+      playPlacePickerState.token += 1;
+      if (playPlacePickerModal) playPlacePickerModal.classList.remove("open");
+      if (playPlaceResultList) {
+        playPlaceResultList.innerHTML = '<div class="play-place-result-empty">请先输入地点关键词。</div>';
+      }
+      if (playPlaceSearchHint) {
+        playPlaceSearchHint.textContent = "输入地点后点击“搜索”，从列表选择一个位置，右侧会显示地图坐标。";
+      }
+      if (confirmPlayPlaceBtn) confirmPlayPlaceBtn.disabled = true;
+      if (playPlacePickerMap && playPlacePickerMarker) {
+        playPlacePickerMap.removeLayer(playPlacePickerMarker);
+        playPlacePickerMarker = null;
+      }
+      if (playPlaceSearchInput) playPlaceSearchInput.value = "";
+    }
+
+    function ensurePlayPlacePickerMap() {
+      if (!playPlacePickerMapEl) return null;
+      if (playPlacePickerMap) return playPlacePickerMap;
+      playPlacePickerMap = L.map(playPlacePickerMapEl, {
+        zoomControl: true,
+        zoomSnap: 0,
+        zoomDelta: 0.5,
+        minZoom: 3,
+        maxZoom: 22
+      });
+      L.tileLayer("https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}", {
+        subdomains: ["1", "2", "3", "4"],
+        maxZoom: 22,
+        maxNativeZoom: 19,
+        attribution: '&copy; <a href="https://www.amap.com/">AutoNavi</a>'
+      }).addTo(playPlacePickerMap);
+      return playPlacePickerMap;
+    }
+
+    function renderPlayPlacePickerResults() {
+      if (!playPlaceResultList) return;
+      const rows = Array.isArray(playPlacePickerState.results) ? playPlacePickerState.results : [];
+      if (!rows.length) {
+        playPlaceResultList.innerHTML = playPlacePickerState.query
+          ? '<div class="play-place-result-empty">未找到相关地点，请换一个更具体的关键词。</div>'
+          : '<div class="play-place-result-empty">请先输入地点关键词。</div>';
+        if (confirmPlayPlaceBtn) confirmPlayPlaceBtn.disabled = true;
+        return;
+      }
+      playPlaceResultList.innerHTML = rows.map((item, idx) => `
+        <button type="button" class="play-place-result-item ${playPlacePickerState.selectedIdx === idx ? "active" : ""}" data-action="pick-play-place-result" data-idx="${idx}">
+          <span class="play-place-result-title">${esc(item.displayName || `候选地点 ${idx + 1}`)}</span>
+          <span class="play-place-result-meta">来源：${esc(item.query || "")}<br>坐标：${Number(item.lat).toFixed(6)}, ${Number(item.lng).toFixed(6)}</span>
+        </button>
+      `).join("");
+      if (confirmPlayPlaceBtn) {
+        confirmPlayPlaceBtn.disabled = !Number.isFinite(playPlacePickerState.selectedIdx) || playPlacePickerState.selectedIdx < 0;
+      }
+    }
+
+    function setPlayPlacePickerSelection(idx) {
+      if (!Number.isFinite(idx) || idx < 0 || idx >= playPlacePickerState.results.length) return;
+      playPlacePickerState.selectedIdx = idx;
+      const item = playPlacePickerState.results[idx];
+      const pickerMap = ensurePlayPlacePickerMap();
+      if (pickerMap && item) {
+        if (playPlacePickerMarker) {
+          pickerMap.removeLayer(playPlacePickerMarker);
+          playPlacePickerMarker = null;
+        }
+        playPlacePickerMarker = L.marker([Number(item.lat), Number(item.lng)]).addTo(pickerMap)
+          .bindPopup(`<b>${esc(item.displayName || "")}</b>`);
+        pickerMap.setView([Number(item.lat), Number(item.lng)], Math.max(12, pickerMap.getZoom() || 12));
+      }
+      renderPlayPlacePickerResults();
+    }
+
+    async function searchPlayPlacePicker(query) {
+      if (!playPlacePickerState.open) return;
+      if (playPlaceSearchBtn) {
+        playPlaceSearchBtn.disabled = true;
+        playPlaceSearchBtn.textContent = "搜索中...";
+      }
+      try {
+        const keyword = String(query || "").trim();
+        playPlacePickerState.query = keyword;
+        playPlacePickerState.selectedIdx = -1;
+        if (!keyword) {
+          playPlacePickerState.results = [];
+          if (playPlaceSearchHint) {
+            playPlaceSearchHint.textContent = "输入地点后点击“搜索”，从列表选择一个位置，右侧会显示地图坐标。";
+          }
+          renderPlayPlacePickerResults();
+          return;
+        }
+        if (keyword.length < 2) {
+          playPlacePickerState.results = [];
+          if (playPlaceSearchHint) {
+            playPlaceSearchHint.textContent = "请至少输入 2 个字再搜索。";
+          }
+          renderPlayPlacePickerResults();
+          return;
+        }
+        const token = ++playPlacePickerState.token;
+        if (playPlaceSearchHint) playPlaceSearchHint.textContent = "正在搜索地点...";
+        const queryList = [];
+        const pushQuery = (raw) => {
+          const txt = String(raw || "").trim();
+          if (!txt || queryList.includes(txt)) return;
+          queryList.push(txt);
+        };
+        if (playPlacePickerState.routeName) pushQuery(`${keyword} ${playPlacePickerState.routeName}`);
+        pushQuery(keyword);
+        const mapResult = new Map();
+        for (const q of queryList) {
+          const rows = await geocodePlaceCandidates(q, 8);
+          rows.forEach((row) => {
+            const key = `${Number(row.lat).toFixed(6)},${Number(row.lng).toFixed(6)}`;
+            if (mapResult.has(key)) return;
+            mapResult.set(key, row);
+          });
+          if (mapResult.size >= 18) break;
+          if (mapResult.size > 0) break;
+        }
+        if (!playPlacePickerState.open || token !== playPlacePickerState.token) return;
+        playPlacePickerState.results = Array.from(mapResult.values()).slice(0, 18);
+        if (playPlaceSearchHint) {
+          playPlaceSearchHint.textContent = playPlacePickerState.results.length
+            ? `找到 ${playPlacePickerState.results.length} 个地点，请点选一个结果。`
+            : "未找到相关地点，请换一个更具体的关键词。";
+        }
+        renderPlayPlacePickerResults();
+      } finally {
+        if (playPlaceSearchBtn) {
+          playPlaceSearchBtn.disabled = false;
+          playPlaceSearchBtn.textContent = "搜索";
+        }
+      }
+    }
+
+    function openPlayPlacePicker(plan, routeIdx) {
+      if (!plan || !Number.isFinite(routeIdx) || routeIdx < 0) return;
+      const route = getPlanRoute(plan);
+      const routePoint = route[routeIdx];
+      if (!routePoint) return;
+      playPlacePickerState.open = true;
+      playPlacePickerState.planId = plan.id;
+      playPlacePickerState.routeIdx = routeIdx;
+      playPlacePickerState.routeName = String(routePoint.name || `地点${routeIdx + 1}`);
+      playPlacePickerState.query = "";
+      playPlacePickerState.results = [];
+      playPlacePickerState.selectedIdx = -1;
+      playPlacePickerState.token += 1;
+      if (playPlacePickerTitle) {
+        playPlacePickerTitle.textContent = `添加游玩地点 · ${playPlacePickerState.routeName}`;
+      }
+      if (playPlaceSearchInput) {
+        playPlaceSearchInput.value = "";
+        playPlaceSearchInput.placeholder = `输入地点关键词（例如：${playPlacePickerState.routeName}）`;
+      }
+      if (playPlaceSearchHint) {
+        playPlaceSearchHint.textContent = "输入地点后点击“搜索”，从列表选择一个位置，右侧会显示地图坐标。";
+      }
+      renderPlayPlacePickerResults();
+      if (playPlacePickerModal) playPlacePickerModal.classList.add("open");
+
+      const pickerMap = ensurePlayPlacePickerMap();
+      if (pickerMap) {
+        if (playPlacePickerMarker) {
+          pickerMap.removeLayer(playPlacePickerMarker);
+          playPlacePickerMarker = null;
+        }
+        const lat = parsePlayCoord(routePoint.lat);
+        const lng = parsePlayCoord(routePoint.lng);
+        if (lat !== null && lng !== null) {
+          pickerMap.setView([lat, lng], 11);
+        } else if (map) {
+          const center = map.getCenter();
+          pickerMap.setView([Number(center.lat), Number(center.lng)], Math.max(6, map.getZoom() || 6));
+        } else {
+          pickerMap.setView([31.2304, 121.4737], 6);
+        }
+        window.setTimeout(() => pickerMap.invalidateSize(), 80);
+      }
+      if (confirmPlayPlaceBtn) confirmPlayPlaceBtn.disabled = true;
+      window.setTimeout(() => { if (playPlaceSearchInput) playPlaceSearchInput.focus(); }, 60);
+    }
+
+    function getPlayItemNameFromCandidate(candidate, fallback = "") {
+      const raw = String(candidate?.displayName || "").trim();
+      if (raw) {
+        const first = raw.split(/[，,]/)[0].trim();
+        if (first) return first.slice(0, 80);
+      }
+      return String(fallback || "").trim() || "新地点";
+    }
+
+    function getGeocodeErrorText(err) {
+      const msg = String(err?.message || err || "");
+      const limited = msg.match(/geocode_rate_limited(?::(\d+))?/);
+      if (limited) {
+        const wait = Number(limited[1] || 0);
+        if (Number.isFinite(wait) && wait > 0) {
+          return `请求过于频繁，请约 ${wait} 秒后重试。`;
+        }
+        return "请求过于频繁，请稍后再试。";
+      }
+      if (msg.includes("geocode_hub_unavailable")) return "地理服务不可用，请先启动 start-services.bat。";
+      if (msg.includes("geocode_timeout")) return "地点定位超时，请检查网络后重试。";
+      return "地点定位失败，请稍后重试。";
+    }
+
+    function finishGeocodePicker(choice = null) {
+      if (!geocodePickerState.open) return;
+      geocodePickerState.open = false;
+      geocodePickerState.candidates = [];
+      if (geocodePickerModal) geocodePickerModal.classList.remove("open");
+      const resolve = geocodePickerState.resolve;
+      geocodePickerState.resolve = null;
+      if (typeof resolve === "function") resolve(choice);
+    }
+
+    function openGeocodePicker(candidates = [], placeName = "", routeName = "") {
+      if (!Array.isArray(candidates) || !candidates.length) {
+        return Promise.resolve(null);
+      }
+      if (!geocodePickerModal || !geocodePickerList || !geocodePickerTitle) {
+        return Promise.resolve(candidates[0] || null);
+      }
+      if (geocodePickerState.open && typeof geocodePickerState.resolve === "function") {
+        geocodePickerState.resolve(null);
+      }
+      geocodePickerState.open = true;
+      geocodePickerState.candidates = candidates.slice();
+      geocodePickerTitle.textContent = `${placeName || "该地点"} 存在多个定位结果`;
+      if (geocodePickerHint) {
+        geocodePickerHint.textContent = routeName
+          ? `目的地：${routeName}。请选择最准确的地点。`
+          : "检测到多个同名地点，请选择正确位置。";
+      }
+      geocodePickerList.innerHTML = candidates.map((item, idx) => `
+        <button type="button" class="geocode-pick-item" data-action="pick-geocode-candidate" data-idx="${idx}">
+          <span class="geocode-pick-name">${esc(item.displayName || `候选地点 ${idx + 1}`)}</span>
+          <span class="geocode-pick-meta">来源：${esc(item.query || "")}<br>坐标：${Number(item.lat).toFixed(6)}, ${Number(item.lng).toFixed(6)}</span>
+        </button>
+      `).join("");
+      geocodePickerModal.classList.add("open");
+      return new Promise((resolve) => {
+        geocodePickerState.resolve = resolve;
+      });
+    }
+
+    async function geocodePlaceCandidates(name, limit = 1) {
+      const key = String(name || "").trim();
+      const maxLimit = Math.max(1, Math.min(10, Number(limit) || 1));
+      if (!key) return [];
+      const cacheKey = `${key}__${maxLimit}`;
+      if (geocodeListCache.has(cacheKey)) {
+        return geocodeListCache.get(cacheKey).map((x) => ({ ...x }));
+      }
+      const now = Date.now();
+      if (geocodeClientRateLimitedUntil > now) {
+        const waitSec = Math.max(1, Math.ceil((geocodeClientRateLimitedUntil - now) / 1000));
+        throw new Error(`geocode_rate_limited:${waitSec}`);
+      }
+
+      // Always use local service-hub proxy.
+      const hubUrl = `${LOCAL_SERVICE_HUB}/api/geocode?q=${encodeURIComponent(key)}&limit=${maxLimit}`;
+      let hubRes;
+      let hubData = {};
+      try {
+        hubRes = await fetch(hubUrl, { headers: { Accept: "application/json" } });
+        hubData = await hubRes.json().catch(() => ({}));
+      } catch (_err) {
+        throw new Error("geocode_hub_unavailable");
+      }
+      if (!hubRes.ok || hubData?.ok === false) {
+        if (Number(hubRes.status) === 429 || String(hubData?.error || "").includes("rate_limited")) {
+          const waitSec = Math.max(1, Number(hubData?.retryAfterSec || hubRes.headers.get("Retry-After") || 0) || 60);
+          geocodeClientRateLimitedUntil = Date.now() + waitSec * 1000;
+          throw new Error(`geocode_rate_limited:${Math.ceil(waitSec)}`);
+        }
+        if (String(hubData?.error || "").includes("timeout")) {
+          throw new Error("geocode_timeout");
+        }
+        throw new Error("geocode_hub_unavailable");
+      }
+      geocodeClientRateLimitedUntil = 0;
+      const rows = Array.isArray(hubData.results)
+        ? hubData.results.map((x) => ({
+          lat: x.lat,
+          lon: x.lng,
+          display_name: x.displayName || key
+        }))
+        : [];
+
+      const seen = new Set();
+      const out = [];
+      for (const row of rows) {
+        const lat = Number(row?.lat);
+        const lng = Number(row?.lon);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+        const dedupeKey = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+        if (seen.has(dedupeKey)) continue;
+        seen.add(dedupeKey);
+        out.push({
+          lat,
+          lng,
+          query: key,
+          displayName: String(row?.display_name || row?.name || key).trim()
+        });
+      }
+      geocodeListCache.set(cacheKey, out);
+      return out.map((x) => ({ ...x }));
+    }
+
     async function geocodePlace(name) {
       const key = String(name || "").trim();
       if (!key) return null;
       if (geocodeCache.has(key)) return geocodeCache.get(key);
-      const url = `${GEOCODE_API}?format=json&limit=1&addressdetails=0&q=${encodeURIComponent(key)}`;
-      const res = await fetch(url, { headers: { Accept: "application/json" } });
-      if (!res.ok) throw new Error("geocode_failed");
-      const data = await res.json();
-      const hit = Array.isArray(data) ? data[0] : null;
-      if (!hit) return null;
-      const result = { lat: Number(hit.lat), lng: Number(hit.lon) };
-      if (!Number.isFinite(result.lat) || !Number.isFinite(result.lng)) return null;
+      const list = await geocodePlaceCandidates(key, 1);
+      const first = list[0];
+      if (!first) return null;
+      const result = { lat: first.lat, lng: first.lng };
       geocodeCache.set(key, result);
       return result;
     }
@@ -5271,13 +6360,12 @@
       async function fetchRouteSegment(a, b) {
         const key = `${a.lng.toFixed(6)},${a.lat.toFixed(6)}|${b.lng.toFixed(6)},${b.lat.toFixed(6)}`;
         if (routeCache.has(key)) return routeCache.get(key);
-        const url = `${ROUTE_API}${a.lng},${a.lat};${b.lng},${b.lat}?overview=false`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("route_failed");
-        const data = await res.json();
-        const route = data && data.routes && data.routes[0];
-        if (!route) throw new Error("route_empty");
-        const payload = { distance: Number(route.distance), duration: Number(route.duration) };
+        const straightKm = Math.max(0.1, haversineKm(a, b));
+        const roadKm = straightKm * 1.22;
+        const payload = {
+          distance: Math.round(roadKm * 1000),
+          duration: Math.round((roadKm / 55) * 3600)
+        };
         routeCache.set(key, payload);
         return payload;
       }
@@ -5356,15 +6444,19 @@
       function renderRouteList(plan) {
         if (!routeList) return;
         const route = getPlanRoute(plan);
+        const openIdx = openPlayListState.planId === plan.id ? Number(openPlayListState.routeIdx) : -1;
         routeList.innerHTML = route.map((p, idx) => `
-          <div class="route-row">
+          <div class="route-row ${openIdx === idx ? "playlist-open" : ""}">
             <input data-route-field="name" data-route-idx="${idx}" placeholder="目的地名称" value="${esc(p.name || `地点${idx + 1}`)}" />
             <input data-route-field="depart" data-route-idx="${idx}" type="time" value="${esc(p.departTime || "")}" />
             <select data-route-field="mode" data-route-idx="${idx}" ${idx === route.length - 1 ? "disabled" : ""}>
               ${TRAVEL_MODES.map(m => `<option value="${m.id}" ${String(p.travelMode || "drive") === m.id ? "selected" : ""}>${m.label}</option>`).join("")}
             </select>
             <input data-route-field="duration" data-route-idx="${idx}" type="number" min="1" step="1" placeholder="分钟" ${idx === route.length - 1 ? "disabled" : ""} value="${Number.isFinite(p.durationOverrideMin) ? Math.round(p.durationOverrideMin) : ""}" />
-            <button type="button" class="mini-btn" data-action="remove-route-point" data-route-idx="${idx}">删除</button>
+            <div class="route-row-actions">
+              <button type="button" class="mini-btn" data-action="remove-route-point" data-route-idx="${idx}">删除</button>
+              <button type="button" class="mini-btn route-playlist-btn ${openIdx === idx ? "active" : ""}" data-action="toggle-play-list" data-route-idx="${idx}">游玩清单</button>
+            </div>
             ${idx < route.length - 1 ? `<div class="route-seg" id="route-seg-${plan.id}-${idx}">第 ${idx + 1} 段：计算中...</div>` : ""}
           </div>
         `).join("");
@@ -5381,14 +6473,16 @@
         maxZoom: 22
       });
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      L.tileLayer("https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}", {
+        subdomains: ["1", "2", "3", "4"],
         maxZoom: 22,
         maxNativeZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        attribution: '&copy; <a href="https://www.amap.com/">AutoNavi</a>'
       }).addTo(map);
 
       markerLayer = L.layerGroup().addTo(map);
       routeLayer = L.layerGroup().addTo(map);
+      playListLayer = L.layerGroup().addTo(map);
       map.on("click", (ev) => {
         if (!routePickMode) return;
         routePickMode = false;
@@ -5406,31 +6500,55 @@
         setPlanRoute(plan.id, route);
         renderMap(plan);
         renderRouteList(plan);
+        renderPlayListPanel(plan);
+      });
+    }
+
+    function renderPlayListMarkers(plan) {
+      if (!playListLayer) return;
+      const ctx = getOpenPlayListContext(plan);
+      if (!ctx) return;
+      const list = getRoutePlayList(ctx.routePoint)
+        .filter((it) => hasPlayCoords(it));
+      list.forEach((item, idx) => {
+        const lat = parsePlayCoord(item.lat);
+        const lng = parsePlayCoord(item.lng);
+        const marker = L.circleMarker([lat, lng], {
+          radius: 7,
+          color: "#0a5f78",
+          weight: 2,
+          fillColor: "#1ba8c2",
+          fillOpacity: 0.82
+        }).addTo(playListLayer);
+        marker.bindPopup(`<b>${esc(item.name || `地点${idx + 1}`)}</b><br>${esc(item.type || "景点")} · ${esc(ctx.routePoint.name || `地点${ctx.routeIdx + 1}`)}`);
       });
     }
 
     function renderMap(plan) {
       markerLayer.clearLayers();
       routeLayer.clearLayers();
+      if (playListLayer) playListLayer.clearLayers();
 
       const route = getPlanRoute(plan).filter(p => Number.isFinite(Number(p.lat)) && Number.isFinite(Number(p.lng)));
-      if (!route.length) return;
-      const latlngs = route.map(p => [p.lat, p.lng]);
-      if (latlngs.length > 1) {
-        const line = L.polyline(latlngs, {
-          color: "#ff6b35",
-          weight: 4,
-          opacity: 0.88
-        }).addTo(routeLayer);
-        map.fitBounds(line.getBounds(), { padding: [24, 24] });
-      } else {
-        map.setView(latlngs[0], 11);
-      }
+      if (route.length) {
+        const latlngs = route.map(p => [p.lat, p.lng]);
+        if (latlngs.length > 1) {
+          const line = L.polyline(latlngs, {
+            color: "#ff6b35",
+            weight: 4,
+            opacity: 0.88
+          }).addTo(routeLayer);
+          map.fitBounds(line.getBounds(), { padding: [24, 24] });
+        } else {
+          map.setView(latlngs[0], 11);
+        }
 
-      route.forEach((p, idx) => {
-        L.marker([p.lat, p.lng]).addTo(markerLayer)
-          .bindPopup(`<b>${idx + 1}. ${p.name}</b><br>${plan.name}`);
-      });
+        route.forEach((p, idx) => {
+          L.marker([p.lat, p.lng]).addTo(markerLayer)
+            .bindPopup(`<b>${idx + 1}. ${p.name}</b><br>${plan.name}`);
+        });
+      }
+      renderPlayListMarkers(plan);
     }
 
     async function render() {
@@ -5442,7 +6560,8 @@
       renderHighlights(plan);
       renderMap(plan);
       renderRouteList(plan);
-      await renderWeather(plan);
+      renderPlayListPanel(plan);
+      renderWeather(plan).catch(() => {});
       await loadPriceHistory(plan.id);
       renderFlightPrices(plan);
       renderHotelPrices(plan);
@@ -5676,15 +6795,21 @@
       if (!recordId) return;
       const plan = plans.find((p) => p.id === currentId);
       if (!plan) return;
-      const ok = window.confirm("确认删除这条价格记录吗？");
-      if (!ok) return;
       delBtn.disabled = true;
       try {
-        await deleteHistoryEntry(recordId);
+        let remoteRemoved = 0;
+        try {
+          remoteRemoved = await deleteHistoryEntry(recordId);
+        } catch (_remoteErr) {
+          remoteRemoved = 0;
+        }
+        const localRemoved = removeHistoryEntryLocal(recordId);
+        if (remoteRemoved <= 0 && localRemoved <= 0) throw new Error("history_delete_miss");
         await loadPriceHistory(plan.id);
         renderFlightPrices(plan);
         renderHotelPrices(plan);
         renderSchemeButtons();
+        setFlightStatus("价格状态：已删除 1 条历史记录");
       } catch (_err) {
         setFlightStatus("价格状态：删除记录失败，请稍后重试");
       } finally {
@@ -5867,6 +6992,104 @@
     priceShotModal.addEventListener("click", (ev) => {
       if (ev.target === priceShotModal) closePriceShot();
     });
+    if (closeGeocodePickerBtn) {
+      closeGeocodePickerBtn.addEventListener("click", () => finishGeocodePicker(null));
+    }
+    if (geocodePickerModal) {
+      geocodePickerModal.addEventListener("click", (ev) => {
+        if (ev.target === geocodePickerModal) finishGeocodePicker(null);
+      });
+    }
+    if (geocodePickerList) {
+      geocodePickerList.addEventListener("click", (ev) => {
+        const btn = ev.target.closest('button[data-action="pick-geocode-candidate"]');
+        if (!btn) return;
+        const idx = Number(btn.dataset.idx);
+        if (!Number.isFinite(idx)) return;
+        const choice = geocodePickerState.candidates[idx] || null;
+        finishGeocodePicker(choice);
+      });
+    }
+    if (closePlayPlacePickerBtn) {
+      closePlayPlacePickerBtn.addEventListener("click", () => closePlayPlacePicker());
+    }
+    if (playPlacePickerModal) {
+      playPlacePickerModal.addEventListener("click", (ev) => {
+        if (ev.target === playPlacePickerModal) closePlayPlacePicker();
+      });
+    }
+    if (playPlaceResultList) {
+      playPlaceResultList.addEventListener("click", (ev) => {
+        const itemBtn = ev.target.closest('button[data-action="pick-play-place-result"]');
+        if (!itemBtn) return;
+        const idx = Number(itemBtn.dataset.idx);
+        if (!Number.isFinite(idx)) return;
+        setPlayPlacePickerSelection(idx);
+      });
+    }
+    const runPlayPlaceSearch = () => {
+      if (!playPlacePickerState.open) return;
+      searchPlayPlacePicker(playPlaceSearchInput?.value || "").catch((err) => {
+        if (playPlaceSearchHint) playPlaceSearchHint.textContent = getGeocodeErrorText(err);
+      });
+    };
+    if (playPlaceSearchBtn) {
+      playPlaceSearchBtn.addEventListener("click", () => runPlayPlaceSearch());
+    }
+    if (playPlaceSearchInput) {
+      playPlaceSearchInput.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") {
+          ev.preventDefault();
+          runPlayPlaceSearch();
+        }
+      });
+    }
+    if (confirmPlayPlaceBtn) {
+      confirmPlayPlaceBtn.addEventListener("click", () => {
+        if (!playPlacePickerState.open) return;
+        const idx = Number(playPlacePickerState.selectedIdx);
+        if (!Number.isFinite(idx) || idx < 0) return;
+        const selected = playPlacePickerState.results[idx];
+        if (!selected) return;
+        const plan = plans.find((p) => p.id === playPlacePickerState.planId);
+        if (!plan) {
+          closePlayPlacePicker();
+          return;
+        }
+        const route = [...getPlanRoute(plan)];
+        const routePoint = route[playPlacePickerState.routeIdx];
+        if (!routePoint) {
+          closePlayPlacePicker();
+          return;
+        }
+        const list = getRoutePlayList(routePoint);
+        list.push(createPlayListItem({
+          name: getPlayItemNameFromCandidate(selected, playPlacePickerState.query),
+          type: "景点",
+          lat: selected.lat,
+          lng: selected.lng
+        }));
+        routePoint.playList = list;
+        setPlanRoute(plan.id, route);
+        if (plan.id === currentId) {
+          renderPlayListPanel(plan);
+          renderMap(plan);
+        }
+        if (map) {
+          map.setView([Number(selected.lat), Number(selected.lng)], Math.max(11, map.getZoom() || 11));
+        }
+        closePlayPlacePicker();
+      });
+    }
+    document.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape" && geocodePickerState.open) {
+        finishGeocodePicker(null);
+        return;
+      }
+      if (ev.key === "Escape" && playPlacePickerState.open) {
+        closePlayPlacePicker();
+      }
+    });
 
     if (runVlmBtn) {
       runVlmBtn.addEventListener("click", async () => {
@@ -6027,6 +7250,7 @@
         setPlanRoute(plan.id, route);
         renderMap(plan);
         renderRouteList(plan);
+        renderPlayListPanel(plan);
         return;
       }
       const pickBtn = ev.target.closest('button[data-action="add-route-point-map"]');
@@ -6127,6 +7351,20 @@
 
     if (routeList) {
       routeList.addEventListener("click", (ev) => {
+        const playBtn = ev.target.closest('button[data-action="toggle-play-list"]');
+        if (playBtn) {
+          ev.preventDefault();
+          const idx = Number(playBtn.dataset.routeIdx);
+          if (!Number.isFinite(idx)) return;
+          const plan = plans.find(p => p.id === currentId);
+          if (!plan) return;
+          toggleOpenPlayList(plan.id, idx);
+          renderRouteList(plan);
+          renderPlayListPanel(plan);
+          renderMap(plan);
+          return;
+        }
+
         const delBtn = ev.target.closest('button[data-action="remove-route-point"]');
         if (!delBtn) return;
         ev.preventDefault();
@@ -6136,9 +7374,11 @@
         if (!plan) return;
         const route = [...getPlanRoute(plan)];
         route.splice(idx, 1);
+        syncOpenPlayListAfterRouteDelete(plan.id, idx);
         setPlanRoute(plan.id, route);
         renderMap(plan);
         renderRouteList(plan);
+        renderPlayListPanel(plan);
       });
 
       routeList.addEventListener("change", (ev) => {
@@ -6154,6 +7394,8 @@
         if (!target) return;
         if (field === "name") {
           target.name = String(fieldEl.value || "").trim() || `地点${idx + 1}`;
+          setPlanRoute(plan.id, route);
+          renderPlayListPanel(plan);
           const token = ++geocodeToken;
           if (routeStats) routeStats.textContent = "地名解析中...";
           geocodePlace(target.name)
@@ -6164,6 +7406,7 @@
               setPlanRoute(plan.id, route);
               renderMap(plan);
               refreshRouteStats(plan);
+              renderPlayListPanel(plan);
             })
             .catch(() => {
               if (routeStats) routeStats.textContent = "地名解析失败，请换个更具体的名称。";
@@ -6186,6 +7429,149 @@
           }
           setPlanRoute(plan.id, route);
           refreshRouteStats(plan);
+        }
+      });
+    }
+
+    if (addPlayItemBtn) {
+      addPlayItemBtn.addEventListener("click", () => {
+        const plan = plans.find((p) => p.id === currentId);
+        if (!plan) return;
+        const ctx = getOpenPlayListContext(plan);
+        if (!ctx) return;
+        openPlayPlacePicker(plan, ctx.routeIdx);
+      });
+    }
+
+    if (playListItems) {
+      playListItems.addEventListener("input", (ev) => {
+        const nameInput = ev.target.closest('input[data-action="play-item-name"]');
+        if (!nameInput) return;
+        const plan = plans.find((p) => p.id === currentId);
+        if (!plan) return;
+        const ctx = getOpenPlayListContext(plan);
+        if (!ctx) return;
+        const itemId = String(nameInput.dataset.playId || "");
+        const route = [...getPlanRoute(plan)];
+        const routePoint = route[ctx.routeIdx];
+        if (!routePoint) return;
+        const list = getRoutePlayList(routePoint);
+        const item = list.find((x) => String(x.id) === itemId);
+        if (!item) return;
+        item.name = String(nameInput.value || "").trim();
+        routePoint.playList = list;
+        setPlanRoute(plan.id, route);
+      });
+
+      playListItems.addEventListener("change", (ev) => {
+        const typeSelect = ev.target.closest('select[data-action="play-item-type"]');
+        if (!typeSelect) return;
+        const plan = plans.find((p) => p.id === currentId);
+        if (!plan) return;
+        const ctx = getOpenPlayListContext(plan);
+        if (!ctx) return;
+        const itemId = String(typeSelect.dataset.playId || "");
+        const route = [...getPlanRoute(plan)];
+        const routePoint = route[ctx.routeIdx];
+        if (!routePoint) return;
+        const list = getRoutePlayList(routePoint);
+        const item = list.find((x) => String(x.id) === itemId);
+        if (!item) return;
+        item.type = normalizePlayItemType(typeSelect.value);
+        routePoint.playList = list;
+        setPlanRoute(plan.id, route);
+        renderPlayListPanel(plan);
+        renderMap(plan);
+      });
+
+      playListItems.addEventListener("click", async (ev) => {
+        const removeBtn = ev.target.closest('button[data-action="play-item-remove"]');
+        if (removeBtn) {
+          ev.preventDefault();
+          const plan = plans.find((p) => p.id === currentId);
+          if (!plan) return;
+          const ctx = getOpenPlayListContext(plan);
+          if (!ctx) return;
+          const itemId = String(removeBtn.dataset.playId || "");
+          const route = [...getPlanRoute(plan)];
+          const routePoint = route[ctx.routeIdx];
+          if (!routePoint) return;
+          const list = getRoutePlayList(routePoint).filter((x) => String(x.id) !== itemId);
+          routePoint.playList = list;
+          setPlanRoute(plan.id, route);
+          renderPlayListPanel(plan);
+          renderMap(plan);
+          return;
+        }
+
+        const locateBtn = ev.target.closest('button[data-action="play-item-locate"]');
+        if (!locateBtn) return;
+        ev.preventDefault();
+        const plan = plans.find((p) => p.id === currentId);
+        if (!plan) return;
+        const ctx = getOpenPlayListContext(plan);
+        if (!ctx) return;
+        const itemId = String(locateBtn.dataset.playId || "");
+        const route = [...getPlanRoute(plan)];
+        const routePoint = route[ctx.routeIdx];
+        if (!routePoint) return;
+        const list = getRoutePlayList(routePoint);
+        const item = list.find((x) => String(x.id) === itemId);
+        if (!item) return;
+        const query = String(item.name || "").trim();
+        if (!query) {
+          window.alert("请先输入地点名称，再点击地图定位。");
+          return;
+        }
+        const oldText = locateBtn.textContent;
+        locateBtn.disabled = true;
+        locateBtn.textContent = "定位中...";
+        try {
+          const queryCandidates = buildGeocodeCandidates(query, routePoint.name || "");
+          const candidateMap = new Map();
+          for (const q of queryCandidates) {
+            const listByQuery = await geocodePlaceCandidates(q, 6);
+            for (const candidate of listByQuery) {
+              const dedupeKey = `${Number(candidate.lat).toFixed(6)},${Number(candidate.lng).toFixed(6)}`;
+              if (candidateMap.has(dedupeKey)) continue;
+              candidateMap.set(dedupeKey, candidate);
+            }
+            if (candidateMap.size >= 10) break;
+          }
+          const pickedCandidates = Array.from(candidateMap.values());
+          if (!pickedCandidates.length) {
+            window.alert("未查到该地点，请换个更具体的名称。");
+            return;
+          }
+          let pos = pickedCandidates[0];
+          if (pickedCandidates.length > 1) {
+            pos = await openGeocodePicker(pickedCandidates, query, routePoint.name || "");
+          }
+          if (!pos) return;
+          const freshPlan = plans.find((p) => p.id === currentId);
+          if (!freshPlan) return;
+          const freshCtx = getOpenPlayListContext(freshPlan);
+          if (!freshCtx) return;
+          const freshRoute = [...getPlanRoute(freshPlan)];
+          const freshPoint = freshRoute[freshCtx.routeIdx];
+          if (!freshPoint) return;
+          const freshList = getRoutePlayList(freshPoint);
+          const freshItem = freshList.find((x) => String(x.id) === itemId);
+          if (!freshItem) return;
+          freshItem.lat = parsePlayCoord(pos.lat);
+          freshItem.lng = parsePlayCoord(pos.lng);
+          freshPoint.playList = freshList;
+          setPlanRoute(freshPlan.id, freshRoute);
+          renderPlayListPanel(freshPlan);
+          renderMap(freshPlan);
+          if (map) {
+            map.setView([freshItem.lat, freshItem.lng], Math.max(11, map.getZoom() || 11));
+          }
+        } catch (err) {
+          window.alert(getGeocodeErrorText(err));
+        } finally {
+          locateBtn.disabled = false;
+          locateBtn.textContent = oldText || "地图定位";
         }
       });
     }
@@ -6480,9 +7866,7 @@
       await loadSpotOverridesFromFile();
       await preloadAllPlanHistory();
       await render();
-      await Promise.all([
-        refreshAllPlanTemps()
-      ]);
+      refreshAllPlanTemps().catch(() => {});
     });
   </script>
 </body>
